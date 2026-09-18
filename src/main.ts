@@ -1,7 +1,7 @@
 import { state, loadState, saveState, getDailyRevenuePeriodStart, getTodayHistory, getMonthHistory, computeMonthlyRevenue, TABLE_COUNT, getDateKey } from './state/store';
 import { calcCost, formatDuration, formatMoney, formatDateTime } from './lib/calculations';
 import { loadSessionsFromSupabase, saveSessionToSupabase } from './api/sessions';
-import { authState, loadAuth, isLoggedIn, setLoggedIn, saveAuth, normalizeAuthValue } from './auth/auth';
+import { currentUser, signIn, signOut, getCurrentUser, onAuthStateChange } from './auth/auth';
 import { renderGrid } from './ui/renderGrid';
 import { setOpenCheckoutCallback } from './ui/renderCard';
 import { renderStats } from './ui/renderHeader';
@@ -34,22 +34,14 @@ const historyWrap = document.getElementById('historyWrap') as HTMLElement;
 const historyCountLabel = document.getElementById('historyCountLabel') as HTMLElement;
 
 const loginOverlay = document.getElementById('loginOverlay') as HTMLElement;
-const loginUsername = document.getElementById('loginUsername') as HTMLInputElement;
+const loginEmail = document.getElementById('loginEmail') as HTMLInputElement;
 const loginPassword = document.getElementById('loginPassword') as HTMLInputElement;
 const loginBtn = document.getElementById('loginBtn') as HTMLButtonElement;
 const loginError = document.getElementById('loginError') as HTMLElement;
-const googleDivider = document.getElementById('googleDivider') as HTMLElement;
-const googleSignInDiv = document.getElementById('googleSignInDiv') as HTMLElement;
-const googleHint = document.getElementById('googleHint') as HTMLElement;
 
 const adminBtn = document.getElementById('adminBtn') as HTMLButtonElement;
 const logoutBtn = document.getElementById('logoutBtn') as HTMLButtonElement;
 const adminOverlay = document.getElementById('adminOverlay') as HTMLElement;
-const adminUsernameInput = document.getElementById('adminUsernameInput') as HTMLInputElement;
-const adminPasswordInput = document.getElementById('adminPasswordInput') as HTMLInputElement;
-const googleClientIdInput = document.getElementById('googleClientIdInput') as HTMLInputElement;
-const adminMsg = document.getElementById('adminMsg') as HTMLElement;
-const saveAdminBtn = document.getElementById('saveAdminBtn') as HTMLButtonElement;
 const closeAdminBtn = document.getElementById('closeAdminBtn') as HTMLButtonElement;
 
 totalCountLabel.textContent = TABLE_COUNT + ' ta stol';
@@ -231,99 +223,64 @@ function exportMonthlyHistoryToCSV() {
 exportMonthlyBtn.addEventListener('click', exportMonthlyHistoryToCSV);
 closeMonthlyBtn.addEventListener('click', () => monthlyReportOverlay.classList.remove('open'));
 
-// Auth logic
+// Supabase Auth logic
 function showLogin() {
   loginOverlay.classList.remove('hidden');
-  loginUsername.value = '';
+  loginEmail.value = '';
   loginPassword.value = '';
   loginError.textContent = '';
-  loginUsername.focus();
-  setupGoogleSignIn();
+  loginEmail.focus();
 }
 
 function hideLogin() {
   loginOverlay.classList.add('hidden');
 }
 
-function attemptLogin() {
-  const u = normalizeAuthValue(loginUsername.value);
-  const p = normalizeAuthValue(loginPassword.value);
-  if (u === normalizeAuthValue(authState.username) && p === normalizeAuthValue(authState.password)) {
-    setLoggedIn(true, true);
-    hideLogin();
+function applyRoleBasedUI() {
+  const adminEls = document.querySelectorAll('.admin-only');
+  adminEls.forEach(el => {
+    if (currentUser?.role === 'admin') {
+      (el as HTMLElement).style.display = '';
+    } else {
+      (el as HTMLElement).style.display = 'none';
+    }
+  });
+}
+
+async function attemptLogin() {
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
+  if (!email || !password) {
+    loginError.textContent = "Email va parolni kiriting";
+    return;
+  }
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Kirilmoqda...";
+  const { error } = await signIn(email, password);
+  loginBtn.disabled = false;
+  loginBtn.textContent = "Kirish";
+
+  if (error) {
+    loginError.textContent = "Login xato: " + error;
   } else {
-    loginError.textContent = "Login yoki parol noto'g'ri";
+    hideLogin();
+    applyRoleBasedUI();
+    loadSessionsFromSupabase(() => {
+      updateStats();
+      renderHistory();
+    });
   }
 }
 
 loginBtn.addEventListener('click', attemptLogin);
 loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-loginUsername.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
 
-logoutBtn.addEventListener('click', () => {
-  setLoggedIn(false);
-  showLogin();
+logoutBtn.addEventListener('click', async () => {
+  await signOut();
 });
 
-function decodeGoogleCredential(jwt: string) {
-  try {
-    const payload = jwt.split('.')[1];
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(
-      atob(base64).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
-    );
-    return JSON.parse(json);
-  } catch (e) {
-    console.error("Google ma'lumotini o'qishda xatolik:", e);
-    return null;
-  }
-}
-
-function handleGoogleCredentialResponse(response: any) {
-  const payload = decodeGoogleCredential(response.credential);
-  if (payload && payload.email) {
-    setLoggedIn(true, true);
-    hideLogin();
-  } else {
-    loginError.textContent = "Google orqali kirishda xatolik yuz berdi";
-  }
-}
-
-function setupGoogleSignIn() {
-  if (!authState.googleClientId) {
-    googleDivider.style.display = 'none';
-    googleSignInDiv.style.display = 'none';
-    googleHint.textContent = "Google orqali kirish yoqilmagan — Admin sozlamalaridan Client ID kiriting.";
-    return;
-  }
-  if (typeof (window as any).google === 'undefined' || !(window as any).google.accounts || !(window as any).google.accounts.id) {
-    googleDivider.style.display = 'none';
-    googleSignInDiv.style.display = 'none';
-    googleHint.textContent = "Google xizmati yuklanmadi (internet aloqasini tekshiring).";
-    return;
-  }
-  googleDivider.style.display = 'flex';
-  googleSignInDiv.style.display = 'flex';
-  googleHint.textContent = '';
-  try {
-    (window as any).google.accounts.id.initialize({
-      client_id: authState.googleClientId,
-      callback: handleGoogleCredentialResponse
-    });
-    googleSignInDiv.innerHTML = '';
-    (window as any).google.accounts.id.renderButton(googleSignInDiv, { theme: 'filled_black', size: 'large', text: 'continue_with', shape: 'pill' });
-  } catch (e) {
-    console.error('Google Sign-In sozlashda xatolik:', e);
-    googleHint.textContent = "Google orqali kirishni ishga tushirib bo'lmadi (Client ID to'g'riligini tekshiring).";
-  }
-}
-
 function openAdminPanel() {
-  adminUsernameInput.value = authState.username;
-  adminPasswordInput.value = '';
-  googleClientIdInput.value = authState.googleClientId;
-  adminMsg.textContent = '';
-  adminMsg.classList.remove('error');
   adminOverlay.classList.add('open');
 }
 
@@ -333,31 +290,6 @@ function closeAdminPanel() {
 
 adminBtn.addEventListener('click', openAdminPanel);
 closeAdminBtn.addEventListener('click', closeAdminPanel);
-
-saveAdminBtn.addEventListener('click', () => {
-  const newUsername = normalizeAuthValue(adminUsernameInput.value);
-  if (!newUsername) {
-    adminMsg.textContent = "Login bo'sh bo'lishi mumkin emas";
-    adminMsg.classList.add('error');
-    return;
-  }
-  authState.username = newUsername;
-  if (adminPasswordInput.value.trim()) authState.password = normalizeAuthValue(adminPasswordInput.value);
-  authState.googleClientId = googleClientIdInput.value.trim();
-  saveAuth();
-  adminMsg.classList.remove('error');
-  adminMsg.textContent = 'Saqlandi ✓';
-  setTimeout(() => { adminMsg.textContent = ''; }, 1500);
-});
-
-function initAuth() {
-  loadAuth();
-  if (isLoggedIn()) {
-    hideLogin();
-  } else {
-    showLogin();
-  }
-}
 
 rateInput.addEventListener('input', () => {
   const val = parseFloat(rateInput.value);
@@ -399,23 +331,48 @@ function tick() {
 }
 
 // Init
-initAuth();
-loadState();
-rateInput.value = state.hourlyRate.toString();
-renderGrid(grid, updateStats);
-updateStats();
-renderHistory();
-tick();
-
-loadSessionsFromSupabase(() => {
+async function initApp() {
+  loadState();
+  rateInput.value = state.hourlyRate.toString();
+  renderGrid(grid, updateStats);
   updateStats();
   renderHistory();
-});
+  tick();
+
+  onAuthStateChange((user) => {
+    if (user) {
+      hideLogin();
+      applyRoleBasedUI();
+      loadSessionsFromSupabase(() => {
+        updateStats();
+        renderHistory();
+      });
+    } else {
+      showLogin();
+    }
+  });
+
+  const user = await getCurrentUser();
+  if (user) {
+    hideLogin();
+    applyRoleBasedUI();
+    loadSessionsFromSupabase(() => {
+      updateStats();
+      renderHistory();
+    });
+  } else {
+    showLogin();
+  }
+}
+
+initApp();
 
 setInterval(tick, 1000);
 setInterval(() => {
-  loadSessionsFromSupabase(() => {
-    updateStats();
-    renderHistory();
-  });
+  if (currentUser) {
+    loadSessionsFromSupabase(() => {
+      updateStats();
+      renderHistory();
+    });
+  }
 }, 60000);

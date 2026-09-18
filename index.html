@@ -36,14 +36,11 @@
   <div class="login-box">
     <div class="ball-mark">8</div>
     <h2>Tizimga kirish</h2>
-    <p class="login-sub">Bilyard Klub Boshqaruviga kirish uchun login va parolni kiriting</p>
-    <input type="text" id="loginUsername" class="field-input" placeholder="Login" autocomplete="username">
+    <p class="login-sub">Bilyard Klub Boshqaruviga kirish uchun email va parolni kiriting</p>
+    <input type="email" id="loginEmail" class="field-input" placeholder="Email" autocomplete="username">
     <input type="password" id="loginPassword" class="field-input" placeholder="Parol" autocomplete="current-password">
     <button class="btn btn-start" id="loginBtn">Kirish</button>
     <div class="login-error" id="loginError"></div>
-    <div class="google-divider" id="googleDivider"><span>yoki</span></div>
-    <div id="googleSignInDiv" class="google-btn-wrap"></div>
-    <p class="google-hint" id="googleHint"></p>
   </div>
 </div>
 
@@ -70,13 +67,13 @@
         <p class="value" id="occupiedCount">0 / 10</p>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" id="adminBtn" title="Admin sozlamalari">⚙</button>
+        <button class="icon-btn admin-only" id="adminBtn" title="Admin sozlamalari">⚙</button>
         <button class="icon-btn" id="logoutBtn" title="Chiqish">⎋</button>
       </div>
     </div>
   </header>
 
-  <div class="controls">
+  <div class="controls admin-only" id="adminControls">
     <label for="hourlyRate">Soatbay narx (so'm):</label>
     <div class="rate-input-group">
       <input type="number" id="hourlyRate" min="0" step="1000" value="30000">
@@ -94,11 +91,11 @@
 
   <div class="grid" id="tablesGrid"></div>
 
-  <div class="section-title">
+  <div class="section-title admin-only" id="historySectionTitle">
     <h2>Bugungi tarix</h2>
     <span class="count" id="historyCountLabel">0 ta o'yin</span>
   </div>
-  <div class="history-wrap" id="historyWrap"></div>
+  <div class="history-wrap admin-only" id="historyWrap"></div>
 
   <footer>Bilyard Klub Boshqaruvi &mdash; ichki foydalanish uchun</footer>
 </div>
@@ -147,23 +144,8 @@
   <div class="modal-box admin-box">
     <h3>Admin sozlamalari</h3>
 
-    <div class="admin-section">
-      <label>Login (foydalanuvchi nomi)</label>
-      <input type="text" id="adminUsernameInput" class="field-input">
-    </div>
-    <div class="admin-section">
-      <label>Yangi parol</label>
-      <input type="password" id="adminPasswordInput" class="field-input" placeholder="Bo'sh qoldirsangiz, parol o'zgarmaydi">
-    </div>
-    <div class="admin-section">
-      <label>Google Client ID</label>
-      <input type="text" id="googleClientIdInput" class="field-input" placeholder="xxxxxxxx.apps.googleusercontent.com">
-      <p class="admin-hint">Google orqali kirishni yoqish uchun Google Cloud Console’dan OAuth Client ID oling va shu yerga joylashtiring.</p>
-    </div>
+    <div class="admin-msg" id="adminMsg">Hozircha bo'sh, bu yerda bar va hisobot sozlamalari bo'ladi.</div>
 
-    <div class="admin-msg" id="adminMsg"></div>
-
-    <button class="btn btn-confirm" id="saveAdminBtn">Saqlash</button>
     <button class="btn btn-cancel" id="closeAdminBtn">Yopish</button>
   </div>
 </div>

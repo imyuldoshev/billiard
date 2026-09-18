@@ -62,31 +62,31 @@
 
 > Hozirgi localStorage login o'rniga haqiqiy auth.
 
-- [ ] **2.1 — Supabase da foydalanuvchilar yaratish**
-  - [ ] Boshliq uchun email/parol hisob (rol: admin)
-  - [ ] Ishchi uchun email/parol hisob (rol: worker)
-  - [ ] `user_metadata` da `{ role: 'admin' | 'worker' }` qo'yish
+- [x] **2.1 — Supabase da foydalanuvchilar yaratish**
+  - [x] Boshliq uchun email/parol hisob (rol: admin)
+  - [x] Ishchi uchun email/parol hisob (rol: worker)
+  - [x] `user_metadata` da `{ role: 'admin' | 'worker' }` qo'yish
 
-- [ ] **2.2 — `src/auth/auth.ts` — Supabase Auth**
-  - [ ] `signIn(email, password)` funksiyasi
-  - [ ] `signOut()` funksiyasi
-  - [ ] `getCurrentUser()` — hozirgi foydalanuvchi va roli
-  - [ ] `onAuthStateChange` — sessiya yangilanishini kuzatish
+- [x] **2.2 — `src/auth/auth.ts` — Supabase Auth**
+  - [x] `signIn(email, password)` funksiyasi
+  - [x] `signOut()` funksiyasi
+  - [x] `getCurrentUser()` — hozirgi foydalanuvchi va roli
+  - [x] `onAuthStateChange` — sessiya yangilanishini kuzatish
 
-- [ ] **2.3 — Login UI yangilanishi**
-  - [ ] Login formasi: email + parol (hozir username + parol)
-  - [ ] Xato xabarlari Supabase dan kelishi
-  - [ ] Muvaffaqiyatli login da — rolga qarab UI ko'rsatish
+- [x] **2.3 — Login UI yangilanishi**
+  - [x] Login formasi: email + parol (hozir username + parol)
+  - [x] Xato xabarlari Supabase dan kelishi
+  - [x] Muvaffaqiyatli login da — rolga qarab UI ko'rsatish
 
-- [ ] **2.4 — Rolga asosida UI**
-  - [ ] Boshliq: barcha funksiyalar ko'rinadi (hisobot, arxiv, admin panel)
-  - [ ] Ishchi: faqat stollar va bar ko'rinadi
+- [x] **2.4 — Rolga asosida UI**
+  - [x] Boshliq: barcha funksiyalar ko'rinadi (hisobot, arxiv, admin panel)
+  - [x] Ishchi: faqat stollar va bar ko'rinadi
 
-- [ ] **2.5 — Supabase RLS yangilanishi**
-  - [ ] `table_sessions` — faqat authenticated foydalanuvchilar
-  - [ ] `bar_items` — read: hammaga, write: faqat admin
-  - [ ] `daily_reports` — faqat admin
-  - [ ] `monthly_reports` — faqat admin
+- [x] **2.5 — Supabase RLS yangilanishi**
+  - [x] `table_sessions` — faqat authenticated foydalanuvchilar
+  - [x] `bar_items` — read: hammaga, write: faqat admin
+  - [x] `daily_reports` — faqat admin
+  - [x] `monthly_reports` — faqat admin
 
 ---
 

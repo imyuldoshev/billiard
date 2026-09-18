@@ -1,52 +1,52 @@
-const AUTH_KEY = 'bilyard-klub-auth-v1';
-const SESSION_KEY = 'bilyard-klub-authed-v1';
+import { supabase } from '../lib/supabase';
+import type { UserRole } from '../types';
 
-export const authState = {
-  username: 'admin',
-  password: 'admin123',
-  googleClientId: ''
-};
+export let currentUser: { id: string, email: string, role: UserRole } | null = null;
 
-export function normalizeAuthValue(value: any) {
-  return typeof value === 'string' ? value.trim() : '';
+export async function signIn(email: string, password: string): Promise<{ error?: string }> {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+  
+  if (data.user) {
+    const role = (data.user.user_metadata?.role as UserRole) || 'worker';
+    currentUser = { id: data.user.id, email: data.user.email || '', role };
+  }
+
+  return {};
 }
 
-export function loadAuth() {
-  try {
-    const raw = localStorage.getItem(AUTH_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        if (typeof parsed.username === 'string' && normalizeAuthValue(parsed.username)) authState.username = normalizeAuthValue(parsed.username);
-        if (typeof parsed.password === 'string' && normalizeAuthValue(parsed.password)) authState.password = normalizeAuthValue(parsed.password);
-        if (typeof parsed.googleClientId === 'string') authState.googleClientId = parsed.googleClientId.trim();
-      }
+export async function signOut(): Promise<void> {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Sign out error:", error);
+  }
+  currentUser = null;
+}
+
+export async function getCurrentUser() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    const role = (session.user.user_metadata?.role as UserRole) || 'worker';
+    currentUser = { id: session.user.id, email: session.user.email || '', role };
+    return currentUser;
+  }
+  return null;
+}
+
+export function onAuthStateChange(callback: (user: typeof currentUser) => void) {
+  return supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      const role = (session.user.user_metadata?.role as UserRole) || 'worker';
+      currentUser = { id: session.user.id, email: session.user.email || '', role };
     } else {
-      saveAuth();
+      currentUser = null;
     }
-  } catch (e) {
-    console.error('Login ma\'lumotlarini yuklashda xatolik:', e);
-  }
-}
-
-export function saveAuth() {
-  try {
-    localStorage.setItem(AUTH_KEY, JSON.stringify(authState));
-  } catch (e) {
-    console.error('Login ma\'lumotlarini saqlashda xatolik:', e);
-  }
-}
-
-export function isLoggedIn() {
-  return sessionStorage.getItem(SESSION_KEY) === 'true' || localStorage.getItem(SESSION_KEY) === 'true';
-}
-
-export function setLoggedIn(value: boolean, remember: boolean = false) {
-  if (value) {
-    if (remember) localStorage.setItem(SESSION_KEY, 'true');
-    else sessionStorage.setItem(SESSION_KEY, 'true');
-  } else {
-    sessionStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_KEY);
-  }
+    callback(currentUser);
+  });
 }
