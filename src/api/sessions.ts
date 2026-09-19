@@ -12,7 +12,10 @@ export async function saveSessionToSupabase(session: Session) {
     started_at: new Date(session.startedAt).toISOString(),
     ended_at: new Date(session.endedAt).toISOString(),
     duration_ms: session.durationMs,
-    amount: session.amount
+    amount: session.amount,
+    pause_duration_ms: session.pauseDurationMs,
+    bar_amount: session.barAmount,
+    payment_method: session.paymentMethod || 'cash'
   });
   if (error) console.error('Supabase seansni saqlashda xatolik:', error);
 }
@@ -23,7 +26,7 @@ export async function loadSessionsFromSupabase(onComplete?: () => void) {
 
   const { data, error } = await supabase
     .from('table_sessions')
-    .select('id, table_id, customer_name, started_at, ended_at, duration_ms, amount')
+    .select('id, table_id, customer_name, started_at, ended_at, duration_ms, amount, pause_duration_ms, bar_amount, total_amount, payment_method')
     .order('ended_at', { ascending: false });
 
   if (error) {
@@ -40,10 +43,10 @@ export async function loadSessionsFromSupabase(onComplete?: () => void) {
     endedAt: session.ended_at,
     durationMs: Number(session.duration_ms),
     amount: Number(session.amount),
-    pauseDurationMs: 0,
-    barAmount: 0,
-    totalAmount: Number(session.amount),
-    paymentMethod: null
+    pauseDurationMs: Number(session.pause_duration_ms),
+    barAmount: Number(session.bar_amount),
+    totalAmount: Number(session.total_amount || session.amount),
+    paymentMethod: session.payment_method
   }));
 
   const remoteIds = new Set(remoteHistory.map(s => s.id));
@@ -56,4 +59,13 @@ export async function loadSessionsFromSupabase(onComplete?: () => void) {
   
   sessionRefreshInProgress = false;
   if (onComplete) onComplete();
+}
+
+export async function deleteSessionFromSupabase(id: string) {
+  const { error } = await supabase.from('table_sessions').delete().eq('id', id);
+  if (error) {
+    console.error('Seansni ochirishda xatolik:', error);
+    return false;
+  }
+  return true;
 }

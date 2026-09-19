@@ -1,4 +1,4 @@
-﻿# STACK — Texnologiya Qaror Hujjati
+# STACK — Texnologiya Qaror Hujjati
 
 > Qaror qabul qilingan sana: 18-sentabr 2026
 > Holat: TASDIQLANGAN ✅
@@ -15,7 +15,6 @@
 | Stil | **CSS (hozirgi saqlangan)** | Dizayn tayyor, o'zgartirish kerak emas |
 | DB | **Supabase (PostgreSQL)** | Hozir ishlamoqda, saqlanadi |
 | Real-time | **Supabase Realtime** | 2 qurilma bir vaqtda sinxron ishlashi uchun |
-| Auth | **Supabase Auth** | Boshliq va ishchi uchun alohida login |
 | Hosting | **Vercel yoki Netlify** | Bepul, Vite bilan mos |
 
 ---
@@ -24,8 +23,8 @@
 
 | Savol | Javob |
 |-------|-------|
-| Foydalanuvchilar soni | 2 ta (boshliq + ishchi) |
-| Qurilmalar | Har biri o'z qurilmasida |
+| Foydalanuvchilar soni | 1 ta (faqat o'zi) |
+| Qurilmalar | Turli qurilmalarda ishlatishi mumkin |
 | Komponentlar soni | 6-8 ta (kichik) |
 | O'rganish xarajati | React o'rganishga vaqt ketadi, natija bir xil |
 | Xulosa | Vanilla TS + Supabase Realtime yetarli |
@@ -58,17 +57,13 @@ bilyard/
 │   │   ├── bar.ts           ← bar_items, bar_orders CRUD
 │   │   └── reports.ts       ← daily_reports, monthly_reports CRUD
 │   │
-│   ├── auth/
-│   │   └── auth.ts          ← Supabase Auth (login, logout, ruxsatlar)
-│   │
 │   └── ui/
 │       ├── renderGrid.ts    ← Stollar panjara
 │       ├── renderCard.ts    ← Bitta stol kartasi
 │       ├── renderBar.ts     ← Bar modali
 │       ├── renderCheckout.ts← Hisob-kitob modali
 │       ├── renderReports.ts ← Kunlik/oylik arxiv
-│       ├── renderHeader.ts  ← Header (tushum, band stollar)
-│       └── renderAdmin.ts   ← Admin paneli
+│       └── renderHeader.ts  ← Header (tushum, band stollar)
 │
 ├── public/
 │   ├── sw.js               ← Service Worker (PWA)
@@ -93,30 +88,6 @@ bilyard/
 
 ---
 
-## Boshliq va Ishchi Ruxsatlari (Auth)
-
-### Supabase Auth Rollari
-
-| Funksiya | Boshliq (admin) | Ishchi (worker) |
-|----------|-----------------|-----------------|
-| Stolni boshlash | ✅ | ✅ |
-| Stolni to'xtatish | ✅ | ✅ |
-| Pauza qilish | ✅ | ✅ |
-| Bar buyurtma | ✅ | ✅ |
-| Bar mahsulotlarini boshqarish | ✅ | ❌ |
-| Hisobotlarni ko'rish | ✅ | ❌ |
-| Arxivni ko'rish | ✅ | ❌ |
-| Soatbay narxni o'zgartirish | ✅ | ❌ |
-| Admin paneli | ✅ | ❌ |
-
-### Supabase da Rol Tizimi
-```sql
--- auth.users jadvalida metadata orqali
--- Har bir foydalanuvchi uchun:
-{ "role": "admin" }  -- boshliq
-{ "role": "worker" } -- ishchi
-```
-
 ---
 
 ## Supabase Realtime — Sinxronizatsiya
@@ -139,10 +110,10 @@ supabase
 ```
 
 **Qanday ishlaydi:**
-1. Ishchi 1-stolni boshladi
+1. Foydalanuvchi 1-stolni boshladi
 2. Supabase ga yoziladi
-3. Boshliqning qurilmasiga Realtime event keladi
-4. Boshliqning ekranida 1-stol "Band" bo'lib ko'rinadi
+3. Boshqa qurilmaga Realtime event keladi
+4. Ikkinchi qurilma ekranida 1-stol "Band" bo'lib ko'rinadi
 5. — va aksincha
 
 ---
@@ -154,5 +125,4 @@ supabase
 3. `script.js` ni modullarga bo'lib TypeScript ga o'tkazish
 4. Supabase client ni yangi tarzda ulash
 5. Realtime subscribe qo'shish
-6. Auth tizimini Supabase Auth ga o'tkazish
-7. Yangi featurelarni qo'shish (bar, pauza, hisobotlar)
+6. Yangi featurelarni qo'shish (bar, pauza, hisobotlar)

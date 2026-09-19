@@ -1,4 +1,4 @@
-﻿# Bilyard Klub Boshqaruvi — Loyiha Hujjati
+# Bilyard Klub Boshqaruvi — Loyiha Hujjati
 
 > Oxirgi yangilanish: 18-sentabr 2026
 > Stack qaror: Vite + TypeScript + Supabase Realtime ✅
@@ -10,7 +10,7 @@
 ```
 docs/
 ├── README.md      ← Shu fayl. Umumiy korinish va yo'riqnoma
-├── TASKS.md       ← Barcha vazifalar (10 bosqich, checkboxlar bilan)
+├── TASKS.md       ← Barcha vazifalar (9 bosqich, checkboxlar bilan)
 ├── STACK.md       ← Texnologiya qaror va loyiha tuzilishi
 ├── FEATURES.md    ← Har bir feature texnik tavsifi (kod, UI, mantiq)
 └── DATABASE.md    ← Supabase schema, SQL migratsiyalar, auto-delete
@@ -25,12 +25,9 @@ bar buyurtmalarini va moliyaviy hisobotlarni boshqarish uchun mo'ljallangan
 veb ilova.
 
 ### Foydalanuvchilar
-| Rol | Kirish | Qurilma |
-|-----|--------|---------|
-| Boshliq (admin) | Barcha funksiyalar | O'z qurilmasi |
-| Ishchi (worker) | Faqat stollar + bar | O'z qurilmasi |
+Loyiha faqat klub egasi tomonidan boshqariladi. Klub egasi barcha qurilmalaridan ulana oladi.
 
-2 ta qurilma bir vaqtda, real-time sinxron ishlaydi (Supabase Realtime).
+Turli qurilmalar bir vaqtda, real-time sinxron ishlaydi (Supabase Realtime).
 
 ---
 
@@ -52,14 +49,13 @@ veb ilova.
 | # | Feature | Bosqich |
 |---|---------|---------|
 | 1 | Vite + TypeScript ga ko'chirish | Bosqich 1 |
-| 2 | Supabase Auth (haqiqiy login) | Bosqich 2 |
-| 3 | Supabase Realtime (2 qurilma sinxron) | Bosqich 3 |
-| 4 | Ma'lumotlar bazasi yangilanishi | Bosqich 4 |
-| 5 | Pauza funksiyasi | Bosqich 5 |
-| 6 | Bar moduli | Bosqich 6 |
-| 7 | To'lov usuli (Naqt / Karta) | Bosqich 7 |
-| 8 | Hisobot tizimi (09:00 smena, arxiv) | Bosqich 8 |
-| 9 | Hosting (Vercel / Netlify) | Bosqich 9 |
+| 2 | Supabase Realtime (Sinxron) | Bosqich 2 |
+| 3 | Ma'lumotlar bazasi yangilanishi | Bosqich 3 |
+| 4 | Pauza funksiyasi | Bosqich 4 |
+| 5 | Bar moduli | Bosqich 5 |
+| 6 | To'lov usuli (Naqt / Karta) | Bosqich 6 |
+| 7 | Hisobot tizimi (09:00 smena, arxiv) | Bosqich 7 |
+| 8 | Hosting (Vercel / Netlify) | Bosqich 8 |
 
 ---
 
@@ -82,11 +78,10 @@ Har bir ish sessionida:
 | Frontend | Vanilla TS | React shart emas, loyiha kichik |
 | Build tool | Vite | Tez, TS qo'llab-quvvatlaydi |
 | Ma'lumotlar bazasi | Supabase | Hozir ishlamoqda, saqlanadi |
-| Auth | Supabase Auth | localStorage xavfsiz emas |
 | Real-time | Supabase Realtime | 2 qurilma sinxron ishlashi uchun |
 | Stollar soni | 4 ta | Klub 4 ta stolga ega |
 | Smena vaqti | 09:00 — 09:00 | Klub ish vaqti |
-| To'lov | Naqt / Karta (print yo'q) | Boshliq talabi |
+| To'lov | Naqt / Karta (print yo'q) | Talab |
 | Bar | Ha | Mijozlar buyurtma qiladi |
 | Pauza | Ha | Tanaffus uchun kerak |
 | Ovoz | Keyinroq | Hozircha shart emas |

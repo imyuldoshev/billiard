@@ -1,0 +1,17 @@
+{
+  "name": "Bilyard Klub Boshqaruvi",
+  "short_name": "Bilyard Klub",
+  "description": "Bilyard vaqtini hisoblovchi elektron tizim",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111812",
+  "theme_color": "#111812",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-﻿# DATABASE — Supabase Schema Rejasi
+# DATABASE — Supabase Schema Rejasi
 
 > Stack: Vite + TypeScript + Supabase (PostgreSQL)
 > Qaror sanasi: 18-sentabr 2026
@@ -55,20 +55,20 @@ comment on column public.table_sessions.total_amount
   is 'O''yin narxi + bar narxi (avtomatik hisoblanadi)';
 ```
 
-### RLS Yangilanishi (Supabase Auth bilan)
+### RLS Yangilanishi
 ```sql
 -- Hozirgi anon policylarni o'chirish
 drop policy if exists "allow billiard app to read sessions"  on public.table_sessions;
 drop policy if exists "allow billiard app to save sessions"  on public.table_sessions;
 
--- Yangi policy: faqat tizimga kirgan foydalanuvchilar
-create policy "authenticated_read"
+-- Yangi policy: hamma yozib o'qishi mumkin (autentifikatsiya yo'q)
+create policy "public_read"
   on public.table_sessions for select
-  to authenticated using (true);
+  to public using (true);
 
-create policy "authenticated_insert"
+create policy "public_insert"
   on public.table_sessions for insert
-  to authenticated with check (true);
+  to public with check (true);
 ```
 
 ---
@@ -93,21 +93,21 @@ create index if not exists bar_items_category_idx
 
 alter table public.bar_items enable row level security;
 
--- Barcha login qilganlar o'qiy oladi
-create policy "authenticated_read"
+-- Barcha o'qiy oladi
+create policy "public_read"
   on public.bar_items for select
-  to authenticated using (true);
+  to public using (true);
 
--- Faqat admin yozadi (user_metadata da role = 'admin')
-create policy "admin_insert"
+-- Barcha yozishi mumkin
+create policy "public_insert"
   on public.bar_items for insert
-  to authenticated
-  with check ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+  to public
+  with check (true);
 
-create policy "admin_update"
+create policy "public_update"
   on public.bar_items for update
-  to authenticated
-  using ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+  to public
+  using (true);
 ```
 
 ---
@@ -136,13 +136,13 @@ create index if not exists bar_orders_session_id_idx
 
 alter table public.bar_orders enable row level security;
 
-create policy "authenticated_read"
+create policy "public_read"
   on public.bar_orders for select
-  to authenticated using (true);
+  to public using (true);
 
-create policy "authenticated_insert"
+create policy "public_insert"
   on public.bar_orders for insert
-  to authenticated with check (true);
+  to public with check (true);
 ```
 
 ---
@@ -173,12 +173,12 @@ create index if not exists daily_reports_date_idx
 
 alter table public.daily_reports enable row level security;
 
--- Faqat admin ko'radi va yozadi
-create policy "admin_all"
+-- Barcha o'qiy oladi va yozadi
+create policy "public_all"
   on public.daily_reports for all
-  to authenticated
-  using ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin')
-  with check ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+  to public
+  using (true)
+  with check (true);
 ```
 
 ---
@@ -210,12 +210,12 @@ create index if not exists monthly_reports_year_month_idx
 
 alter table public.monthly_reports enable row level security;
 
--- Faqat admin ko'radi va yozadi
-create policy "admin_all"
+-- Barcha o'qiy oladi va yozadi
+create policy "public_all"
   on public.monthly_reports for all
-  to authenticated
-  using ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin')
-  with check ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+  to public
+  using (true)
+  with check (true);
 ```
 
 ---

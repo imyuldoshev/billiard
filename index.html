@@ -2,12 +2,13 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bilyard Klub Boshqaruvi</title>
-
-<!-- PWA uchun: Manifest va Tema rangi -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#2c3e50"> <!-- Telefon tepadagi status bar rangi -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#111812" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,17 +33,6 @@
 </head>
 <body>
 
-<div class="login-overlay" id="loginOverlay">
-  <div class="login-box">
-    <div class="ball-mark">8</div>
-    <h2>Tizimga kirish</h2>
-    <p class="login-sub">Bilyard Klub Boshqaruviga kirish uchun email va parolni kiriting</p>
-    <input type="email" id="loginEmail" class="field-input" placeholder="Email" autocomplete="username">
-    <input type="password" id="loginPassword" class="field-input" placeholder="Parol" autocomplete="current-password">
-    <button class="btn btn-start" id="loginBtn">Kirish</button>
-    <div class="login-error" id="loginError"></div>
-  </div>
-</div>
 
 <div class="wrap">
 
@@ -57,8 +47,7 @@
     <div class="stats-row">
       <div class="stat-chip">
         <div class="daily-revenue-label">
-          <button class="daily-refresh-btn" id="dailyRevenueRefreshBtn" type="button" title="Kunlik tushumni 0 ga tushirish" aria-label="Kunlik tushumni 0 ga tushirish">↻</button>
-          <p class="label">Kunlik tushum</p>
+          <p class="label">Joriy smena tushumi</p>
         </div>
         <p class="value" id="dailyRevenue">0 so'm</p>
       </div>
@@ -66,22 +55,19 @@
         <p class="label">Band stollar</p>
         <p class="value" id="occupiedCount">0 / 10</p>
       </div>
-      <div class="header-actions">
-        <button class="icon-btn admin-only" id="adminBtn" title="Admin sozlamalari">⚙</button>
-        <button class="icon-btn" id="logoutBtn" title="Chiqish">⎋</button>
-      </div>
     </div>
   </header>
 
-  <div class="controls admin-only" id="adminControls">
+  <div class="controls" id="adminControls">
     <label for="hourlyRate">Soatbay narx (so'm):</label>
     <div class="rate-input-group">
       <input type="number" id="hourlyRate" min="0" step="1000" value="30000">
       <span class="unit">so'm / soat</span>
     </div>
     <span class="save-note" id="saveNote">Saqlandi ✓</span>
-    <button class="export-btn" id="monthlyReportBtn">Oylik hisobot</button>
-    <button class="export-btn" id="exportBtn">Kunlik hisobotni yuklab olish (CSV)</button>
+    <button class="export-btn" id="barSettingsBtn">Bar boshqaruvi</button>
+    <button class="export-btn" id="dailyArchiveBtn">Kunlik arxiv</button>
+    <button class="export-btn" id="monthlyArchiveBtn">Oylik arxiv</button>
   </div>
 
   <div class="section-title">
@@ -91,27 +77,28 @@
 
   <div class="grid" id="tablesGrid"></div>
 
-  <div class="section-title admin-only" id="historySectionTitle">
+  <div class="section-title" id="historySectionTitle">
     <h2>Bugungi tarix</h2>
     <span class="count" id="historyCountLabel">0 ta o'yin</span>
   </div>
-  <div class="history-wrap admin-only" id="historyWrap"></div>
+  <div class="history-wrap" id="historyWrap"></div>
 
   <footer>Bilyard Klub Boshqaruvi &mdash; ichki foydalanish uchun</footer>
 </div>
 
-<div class="modal-overlay" id="monthlyReportOverlay">
-  <div class="modal-box report-box">
-    <div class="ball-mark">8</div>
-    <h3>Oylik hisobot</h3>
-    <div class="report-toolbar">
-      <label for="reportMonth">Oy</label>
-      <input type="month" id="reportMonth" class="field-input">
-    </div>
-    <div class="modal-row"><span>Yakunlangan o'yinlar</span><b id="monthlyGames">0</b></div>
-    <div class="modal-row total"><span>Jami daromad</span><b id="monthlyRevenue">0 so'm</b></div>
-    <button class="btn btn-confirm" id="exportMonthlyBtn">Oylik CSV yuklash</button>
-    <button class="btn btn-cancel" id="closeMonthlyBtn">Yopish</button>
+<div class="modal-overlay" id="dailyArchiveOverlay">
+  <div class="modal-box report-box" style="max-width: 600px;">
+    <h3>Kunlik arxivlar</h3>
+    <div id="dailyArchiveList" style="display:flex; overflow-x: auto; gap: 12px; padding: 10px 0; margin-bottom:12px;"></div>
+    <button class="btn btn-cancel" id="closeDailyArchiveBtn">Yopish</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="monthlyArchiveOverlay">
+  <div class="modal-box report-box" style="max-width: 500px;">
+    <h3>Oylik arxivlar</h3>
+    <div id="monthlyArchiveList" style="max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom:12px;"></div>
+    <button class="btn btn-cancel" id="closeMonthlyArchiveBtn">Yopish</button>
   </div>
 </div>
 
@@ -131,24 +118,65 @@
       <span>O'ynalgan vaqt</span>
       <b id="modalDuration">00:00:00</b>
     </div>
+    <div class="modal-row" id="modalPauseRow" style="display:none;">
+      <span>Pauza vaqti</span>
+      <b id="modalPauseDuration">00:00:00</b>
+    </div>
+    <div class="modal-row" id="modalGameCostRow">
+      <span>O'yin narxi</span>
+      <b id="modalGameCost">0 so'm</b>
+    </div>
+    <div class="modal-row" id="modalBarCostRow" style="display:none;">
+      <span>Bar narxi</span>
+      <b id="modalBarCost">0 so'm</b>
+    </div>
     <div class="modal-row total">
-      <span>To'lanadigan summa</span>
+      <span>JAMI SUMMA</span>
       <b id="modalAmount">0 so'm</b>
     </div>
-    <button class="btn btn-confirm" id="confirmPaymentBtn">To'lov qabul qilindi</button>
-    <button class="btn btn-cancel" id="cancelPaymentBtn">Orqaga</button>
+    <div style="display: flex; gap: 8px; margin-top: 16px;">
+      <button class="btn btn-start" id="payCashBtn" style="flex:1;">💵 Naqt to'lov</button>
+      <button class="btn" id="payCardBtn" style="flex:1; background: linear-gradient(135deg, #1d4b68, #133245); color:#fff;">💳 Karta orqali</button>
+    </div>
+    <button class="btn btn-cancel" id="cancelPaymentBtn" style="margin-top: 8px;">Orqaga</button>
+  </div>
+</div>
+<div class="modal-overlay" id="barSettingsOverlay">
+  <div class="modal-box report-box" style="max-width: 500px;">
+    <h3>Bar boshqaruvi</h3>
+    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+      <input type="text" id="barItemName" class="field-input" placeholder="Mahsulot nomi">
+      <input type="number" id="barItemPrice" class="field-input" placeholder="Narxi" style="width: 100px;">
+      <select id="barItemCategory" class="field-input" style="width: 100px;">
+        <option value="ichimlik">Ichimlik</option>
+        <option value="taom">Taom</option>
+        <option value="boshqa">Boshqa</option>
+      </select>
+      <button class="btn btn-confirm" id="addBarItemBtn" style="width: auto; margin:0;">Qo'shish</button>
+    </div>
+    <div id="barItemsList" style="max-height: 300px; overflow-y: auto; text-align: left; font-size: 13.5px; color: var(--cream-dim);">
+      <!-- list -->
+    </div>
+    <button class="btn btn-cancel" id="closeBarSettingsBtn" style="margin-top: 16px;">Yopish</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="adminOverlay">
-  <div class="modal-box admin-box">
-    <h3>Admin sozlamalari</h3>
-
-    <div class="admin-msg" id="adminMsg">Hozircha bo'sh, bu yerda bar va hisobot sozlamalari bo'ladi.</div>
-
-    <button class="btn btn-cancel" id="closeAdminBtn">Yopish</button>
+<div class="modal-overlay" id="barOrderOverlay">
+  <div class="modal-box report-box" style="max-width: 400px;">
+    <h3>Bardan qo'shish</h3>
+    <p id="barOrderTableLabel" style="font-size: 13.5px; color: var(--cream-dim); margin-bottom: 12px;"></p>
+    <div id="barOrderItems" style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 12px;">
+      <!-- items with + and - -->
+    </div>
+    <div class="modal-row total">
+      <span>Jami summa:</span>
+      <b id="barOrderTotalAmount">0 so'm</b>
+    </div>
+    <button class="btn btn-confirm" id="confirmBarOrderBtn">Qo'shish</button>
+    <button class="btn btn-cancel" id="cancelBarOrderBtn">Bekor qilish</button>
   </div>
 </div>
+
 
 <script type="module" src="/src/main.ts"></script>
 </body>
