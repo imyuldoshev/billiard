@@ -20,3 +20,35 @@ export function formatDateTime(ms: number): string {
 export function calcCost(ms: number, rate: number): number {
   return (ms / 3600000) * rate;
 }
+
+import type { Table } from '../types';
+
+export function getEffectiveDuration(table: Table): number {
+  if (!table.startTime) return 0;
+  const start = new Date(table.startTime).getTime();
+  const now = Date.now();
+  let duration = now - start - table.totalPauseDurationMs;
+  if (table.isPaused && table.pauseStartTime) {
+    const pStart = new Date(table.pauseStartTime).getTime();
+    duration -= (now - pStart);
+  }
+  return Math.max(0, duration);
+}
+
+// Smena (shift) har doim 09:00 da boshlanadi
+export function getCurrentShiftStart(nowMs: number = Date.now()): number {
+  const d = new Date(nowMs);
+  const hour = d.getHours();
+  // Agar soat 00:00 dan 08:59 gacha bo'lsa, smena kecha 09:00 da boshlangan
+  if (hour < 9) {
+    d.setDate(d.getDate() - 1);
+  }
+  d.setHours(9, 0, 0, 0);
+  return d.getTime();
+}
+
+export function getCurrentShiftEnd(shiftStartMs: number): number {
+  const d = new Date(shiftStartMs);
+  d.setDate(d.getDate() + 1);
+  return d.getTime();
+}

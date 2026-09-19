@@ -1,4 +1,4 @@
-﻿# FEATURES — Feature lar Texnik Tavsifi
+# FEATURES — Feature lar Texnik Tavsifi
 
 > Stack: Vite + TypeScript + Supabase Realtime
 > Qaror sanasi: 18-sentabr 2026
@@ -14,7 +14,7 @@ o'yin vaqti + bar jami ko'rsatiladi.
 
 ### User Flow (Oqim)
 ```
-Admin mahsulot qo'shadi (Admin panel > Bar)
+Mahsulot qo'shiladi
        |
 Stol "Band" holati  -->  [🍺 Bar] tugmasi paydo bo'ladi
        |
@@ -303,32 +303,10 @@ va tarixda saqlanadi.
 
 ---
 
-## 5. FOYDALANUVCHILAR VA RUXSATLAR
-
-### 2 ta foydalanuvchi
-| | Boshliq (admin) | Ishchi (worker) |
-|-|-----------------|-----------------|
-| Stolni boshlash / to'xtatish | ✅ | ✅ |
-| Pauza qilish | ✅ | ✅ |
-| Bar buyurtma qo'shish | ✅ | ✅ |
-| Bar mahsulotlarini boshqarish | ✅ | ❌ |
-| Kunlik arxiv ko'rish | ✅ | ❌ |
-| Oylik arxiv ko'rish | ✅ | ❌ |
-| Narxni o'zgartirish | ✅ | ❌ |
-| Admin paneli | ✅ | ❌ |
-| CSV eksport | ✅ | ❌ |
-
-### Login
-- Supabase Auth: email + parol
-- Ishchi ekranda: faqat stollar va bar ko'rinadi
-- Boshliq ekranda: hamma narsa ko'rinadi
-
----
-
-## 6. SUPABASE REALTIME (2 QURILMA SINXRON)
+## 5. SUPABASE REALTIME (2 QURILMA SINXRON)
 
 ### Maqsad
-Boshliq va ishchi har biri o'z qurilmasida ishlaydi.
+Ikki xil qurilmada bir vaqtda foydalanilganda ma'lumotlar sinxron bo'lishi kerak.
 Bir qurilmada o'zgarish bo'lsa — ikkinchisida ham darhol yangilanadi.
 
 ### Subscribe Kanallar

@@ -39,6 +39,7 @@ export function loadState(): void {
           state.tables = parsed.tables;
         }
         if (Array.isArray(parsed.history)) state.history = parsed.history;
+        if (Array.isArray(parsed.barItems)) state.barItems = parsed.barItems;
         if (parsed.dailyRevenueResetAtByDate && typeof parsed.dailyRevenueResetAtByDate === 'object') {
           state.dailyRevenueResetAtByDate = parsed.dailyRevenueResetAtByDate;
         }
@@ -71,31 +72,19 @@ export function getDateKey(ms: number) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-export function getTodayHistory(): Session[] {
-  const now = Date.now();
-  return state.history.filter(h => isSameDay(h.endedAt, now));
-}
+import { getCurrentShiftStart, getCurrentShiftEnd } from '../lib/calculations';
 
-export function getDailyRevenuePeriodStart() {
-  const now = Date.now();
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  let periodStart = Number(state.dailyRevenuePeriodStartedAt) || todayStart.getTime();
-  const manualResetAt = Number(state.dailyRevenueResetAtByDate[getDateKey(now)] || 0);
-  if (manualResetAt > periodStart) periodStart = manualResetAt;
-  if (now - periodStart >= DAILY_REVENUE_PERIOD_MS) {
-    periodStart = now;
-    state.dailyRevenuePeriodStartedAt = periodStart;
-    saveState();
-  }
-  return periodStart;
+export function getTodayHistory(): Session[] {
+  const shiftStart = getCurrentShiftStart();
+  const shiftEnd = getCurrentShiftEnd(shiftStart);
+  return state.history.filter(h => {
+    const endMs = new Date(h.endedAt).getTime();
+    return endMs >= shiftStart && endMs < shiftEnd;
+  });
 }
 
 export function computeDailyRevenue() {
-  const periodStart = getDailyRevenuePeriodStart();
-  return state.history
-    .filter(h => new Date(h.endedAt).getTime() > periodStart && new Date(h.endedAt).getTime() <= Date.now())
-    .reduce((sum, h) => sum + h.amount, 0);
+  return getTodayHistory().reduce((sum, h) => sum + h.totalAmount, 0);
 }
 
 export function getMonthHistory(monthValue: string): Session[] {

@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'worker';
+
 
 export interface BarOrder {
   itemId: string;
