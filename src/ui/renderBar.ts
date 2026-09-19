@@ -1,6 +1,6 @@
 import { state, saveState } from '../state/store';
 import { formatMoney } from '../lib/calculations';
-import type { BarOrder } from '../types';
+
 
 const overlay = document.getElementById('barOrderOverlay') as HTMLElement;
 const closeBtn = document.getElementById('cancelBarOrderBtn') as HTMLButtonElement;

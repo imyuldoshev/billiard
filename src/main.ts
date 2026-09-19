@@ -1,4 +1,4 @@
-import { state, loadState, saveState, getTodayHistory, getMonthHistory, computeMonthlyRevenue, TABLE_COUNT } from './state/store';
+import { state, loadState, saveState, getTodayHistory, TABLE_COUNT } from './state/store';
 import { calcCost, formatDuration, formatMoney, formatDateTime, getEffectiveDuration } from './lib/calculations';
 import { loadSessionsFromSupabase, saveSessionToSupabase, deleteSessionFromSupabase } from './api/sessions';
 
@@ -14,20 +14,12 @@ const occupiedCountEl = document.getElementById('occupiedCount') as HTMLElement;
 const rateInput = document.getElementById('hourlyRate') as HTMLInputElement;
 const saveNote = document.getElementById('saveNote') as HTMLElement;
 const exportBtn = document.getElementById('exportBtn') as HTMLButtonElement;
-const monthlyReportBtn = document.getElementById('monthlyReportBtn') as HTMLButtonElement;
-const monthlyReportOverlay = document.getElementById('monthlyReportOverlay') as HTMLElement;
-const reportMonth = document.getElementById('reportMonth') as HTMLInputElement;
-const monthlyGames = document.getElementById('monthlyGames') as HTMLElement;
-const monthlyRevenue = document.getElementById('monthlyRevenue') as HTMLElement;
-const exportMonthlyBtn = document.getElementById('exportMonthlyBtn') as HTMLButtonElement;
-const closeMonthlyBtn = document.getElementById('closeMonthlyBtn') as HTMLButtonElement;
 const modalOverlay = document.getElementById('modalOverlay') as HTMLElement;
 const modalTableName = document.getElementById('modalTableName') as HTMLElement;
 const modalCustomerRow = document.getElementById('modalCustomerRow') as HTMLElement;
 const modalCustomerName = document.getElementById('modalCustomerName') as HTMLElement;
 const modalDuration = document.getElementById('modalDuration') as HTMLElement;
 const modalAmount = document.getElementById('modalAmount') as HTMLElement;
-const confirmPaymentBtn = document.getElementById('confirmPaymentBtn') as HTMLButtonElement;
 const cancelPaymentBtn = document.getElementById('cancelPaymentBtn') as HTMLButtonElement;
 import { openBarSettings } from './ui/renderBarSettings';
 import { loadBarItems, saveBarOrders } from './api/bar';

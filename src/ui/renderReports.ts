@@ -1,6 +1,6 @@
 import { loadDailyReports, loadMonthlyReports } from '../api/reports';
 import { formatMoney } from '../lib/calculations';
-import type { DailyReport, MonthlyReport } from '../types';
+
 
 const dailyOverlay = document.getElementById('dailyArchiveOverlay') as HTMLElement;
 const monthlyOverlay = document.getElementById('monthlyArchiveOverlay') as HTMLElement;

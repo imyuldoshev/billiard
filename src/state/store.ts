@@ -61,16 +61,7 @@ export function saveState(): void {
   }
 }
 
-function isSameDay(msA: number | string, msB: number | string) {
-  const a = new Date(msA), b = new Date(msB);
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
 
-export function getDateKey(ms: number) {
-  const date = new Date(ms);
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
 
 import { getCurrentShiftStart, getCurrentShiftEnd } from '../lib/calculations';
 
