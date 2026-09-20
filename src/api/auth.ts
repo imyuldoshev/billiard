@@ -7,7 +7,7 @@ export async function checkPhoneExists(phone: string): Promise<boolean> {
     .from("users")
     .select("phone")
     .eq("phone", phone)
-    .single();
+    .maybeSingle();
 
   if (error) return false;
   return !!data;
@@ -35,7 +35,7 @@ export async function verifyPin(phone: string, pin: string): Promise<boolean> {
     .from("users")
     .select("pin")
     .eq("phone", phone)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return false;
   
