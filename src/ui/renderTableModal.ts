@@ -1,6 +1,5 @@
 import { state } from '../state/store';
 import { formatMoney, formatDuration, getEffectiveDuration, calcCost } from '../lib/calculations';
-import { openBarOrder } from './renderBar';
 import { startTable, togglePause, openCheckoutCallback } from './tableActions';
 
 let modalTimerInterval: number | null = null;
@@ -149,15 +148,66 @@ export function openTableModal(tableId: number, onRender: () => void) {
     btnRow.style.marginTop = '8px';
     btnRow.style.flexDirection = 'column';
 
-    const barBtn = document.createElement('button');
-    barBtn.className = 'btn';
-    barBtn.style.background = 'linear-gradient(135deg, #1d4b68, #133245)';
-    barBtn.style.color = '#fff';
-    barBtn.textContent = '🍺 Bar qo\'shish';
-    barBtn.addEventListener('click', () => {
-      closeTableModal();
-      openBarOrder(table.id, onRender);
+    const addBarDiv = document.createElement('div');
+    addBarDiv.style.marginTop = '16px';
+    addBarDiv.style.paddingTop = '16px';
+    addBarDiv.style.borderTop = '1px dashed rgba(255,255,255,0.1)';
+
+    const addBarTitle = document.createElement('div');
+    addBarTitle.style.fontWeight = '600';
+    addBarTitle.style.marginBottom = '8px';
+    addBarTitle.style.fontSize = '14px';
+    addBarTitle.textContent = 'Bardan sotish:';
+
+    const addBarControls = document.createElement('div');
+    addBarControls.style.display = 'flex';
+    addBarControls.style.gap = '8px';
+
+    const barSelect = document.createElement('select');
+    barSelect.className = 'field-input';
+    barSelect.style.flex = '1';
+    
+    const activeItems = state.barItems.filter(i => i.isActive);
+    if (activeItems.length > 0) {
+      activeItems.forEach(item => {
+         const opt = document.createElement('option');
+         opt.value = item.id;
+         opt.textContent = `${item.name} (${formatMoney(item.price)})`;
+         barSelect.appendChild(opt);
+      });
+    } else {
+      const opt = document.createElement('option');
+      opt.textContent = 'Mahsulotlar yo\'q';
+      opt.disabled = true;
+      barSelect.appendChild(opt);
+    }
+
+    const barAddBtn = document.createElement('button');
+    barAddBtn.className = 'btn btn-confirm';
+    barAddBtn.style.width = 'auto';
+    barAddBtn.textContent = 'Qo\'shish';
+    barAddBtn.disabled = activeItems.length === 0;
+
+    barAddBtn.addEventListener('click', () => {
+      const itemId = barSelect.value;
+      const item = activeItems.find(i => i.id === itemId);
+      if (item) {
+        const existing = table.barOrders.find(o => o.itemId === itemId);
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          table.barOrders.push({ itemId, name: item.name, price: item.price, qty: 1 });
+        }
+        import('../state/store').then(({ saveState }) => saveState());
+        openTableModal(table.id, onRender); // Qayta render qilish
+        onRender();
+      }
     });
+
+    addBarControls.appendChild(barSelect);
+    addBarControls.appendChild(barAddBtn);
+    addBarDiv.appendChild(addBarTitle);
+    addBarDiv.appendChild(addBarControls);
 
     const actionRow = document.createElement('div');
     actionRow.style.display = 'flex';
@@ -184,10 +234,10 @@ export function openTableModal(tableId: number, onRender: () => void) {
     actionRow.appendChild(pauseBtn);
     actionRow.appendChild(stopBtn);
     
-    btnRow.appendChild(barBtn);
     btnRow.appendChild(actionRow);
 
     content.appendChild(timerWrapper);
+    content.appendChild(addBarDiv);
     content.appendChild(btnRow);
   }
 

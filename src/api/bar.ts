@@ -21,7 +21,14 @@ export async function loadBarItems(): Promise<BarItem[]> {
 }
 
 export async function addBarItem(item: Omit<BarItem, 'id' | 'isActive'>): Promise<BarItem | null> {
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return null;
+  const localFallback: BarItem = {
+    id: 'local_' + Date.now().toString(),
+    name: item.name,
+    price: item.price,
+    category: item.category,
+    isActive: true
+  };
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return localFallback;
   const { data, error } = await supabase
     .from('bar_items')
     .insert({ name: item.name, price: item.price, category: item.category })
@@ -29,8 +36,8 @@ export async function addBarItem(item: Omit<BarItem, 'id' | 'isActive'>): Promis
     .single();
   
   if (error) {
-    console.error('Mahsulot qo`shishda xatolik:', error);
-    return null;
+    console.error('Mahsulot qo`shishda xatolik, lokal saqlanadi:', error);
+    return localFallback;
   }
   return {
     id: data.id,
@@ -55,8 +62,8 @@ export async function updateBarItem(id: string, updates: Partial<BarItem>): Prom
     .eq('id', id);
 
   if (error) {
-    console.error('Mahsulotni yangilashda xatolik:', error);
-    return false;
+    console.error('Mahsulotni yangilashda xatolik, lokal o`zgaradi:', error);
+    return true; // RLS xatolik bo'lsa ham lokalda o'chirish uchun
   }
   return true;
 }

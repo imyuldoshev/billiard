@@ -7,29 +7,43 @@ const closeBtn = document.getElementById('cancelBarOrderBtn') as HTMLButtonEleme
 const confirmBtn = document.getElementById('confirmBarOrderBtn') as HTMLButtonElement;
 const list = document.getElementById('barOrderItems') as HTMLElement;
 const totalLabel = document.getElementById('barOrderTotalAmount') as HTMLElement;
-const tableLabel = document.getElementById('barOrderTableLabel') as HTMLElement;
 
-let currentTableId: number | null = null;
 let currentDraft: Record<string, number> = {}; // itemId -> quantity
 let onConfirmCb: (() => void) | null = null;
 
-export function openBarOrder(tableId: number, onConfirm: () => void) {
-  currentTableId = tableId;
+export function openBarOrder(onConfirm?: () => void) {
+  const select = document.getElementById('barOrderTableSelect') as HTMLSelectElement;
+  if (!select) return;
+
+  select.innerHTML = '';
+  const occupiedTables = state.tables.filter(t => t.occupied);
+  if (occupiedTables.length === 0) {
+    alert("Barcha stollar bo'sh. Avval stolni boshlang!");
+    return;
+  }
+
+  occupiedTables.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id.toString();
+    opt.textContent = `${t.id}-stol`;
+    select.appendChild(opt);
+  });
+
   currentDraft = {};
-  onConfirmCb = onConfirm;
-  tableLabel.textContent = `${tableId}-stol uchun bardan mahsulot tanlash`;
+  onConfirmCb = onConfirm || null;
   renderList();
   overlay.classList.add('open');
 }
 
 closeBtn?.addEventListener('click', () => {
   overlay.classList.remove('open');
-  currentTableId = null;
 });
 
 confirmBtn?.addEventListener('click', () => {
-  if (currentTableId === null) return;
-  const table = state.tables.find(t => t.id === currentTableId);
+  const select = document.getElementById('barOrderTableSelect') as HTMLSelectElement;
+  if (!select || !select.value) return;
+  const tid = parseInt(select.value);
+  const table = state.tables.find(t => t.id === tid);
   if (!table) return;
 
   const activeItems = state.barItems.filter(i => i.isActive);
@@ -52,7 +66,6 @@ confirmBtn?.addEventListener('click', () => {
   saveState();
   if (onConfirmCb) onConfirmCb();
   overlay.classList.remove('open');
-  currentTableId = null;
 });
 
 function esc(s: string) {

@@ -2,6 +2,7 @@ import { state, loadState, saveState, getTodayHistory, TABLE_COUNT } from './sta
 import { calcCost, formatDuration, formatMoney, formatDateTime, getEffectiveDuration, getCurrentShiftStart } from './lib/calculations';
 import { loadSessionsFromSupabase, saveSessionToSupabase, deleteSessionFromSupabase } from './api/sessions';
 import { openBarSettings } from './ui/renderBarSettings';
+import { openBarOrder } from './ui/renderBar';
 import { loadBarItems, saveBarOrders } from './api/bar';
 import { renderGrid } from './ui/renderGrid';
 import { setOpenCheckoutCallback } from './ui/tableActions';
@@ -27,6 +28,16 @@ const cancelPaymentBtn = document.getElementById('cancelPaymentBtn') as HTMLButt
 
 const barSettingsBtn = document.getElementById('barSettingsBtn') as HTMLButtonElement;
 barSettingsBtn.addEventListener('click', openBarSettings);
+const barSellBtn = document.getElementById('barSellBtn') as HTMLButtonElement;
+barSellBtn?.addEventListener('click', () => {
+  openBarOrder(() => {
+    updateStats();
+    renderHistory();
+    // Shuningdek ochiq modallarni yangilash kerak bo'lishi mumkin, 
+    // lekin hozir modal yopiq bo'ladi
+    renderGrid(grid, updateStats);
+  });
+});
 const totalCountLabel = document.getElementById('totalCountLabel') as HTMLElement;
 const historyWrap = document.getElementById('historyWrap') as HTMLElement;
 const historyCountLabel = document.getElementById('historyCountLabel') as HTMLElement;
