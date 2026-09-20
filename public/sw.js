@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bilyard-klub-v1';
+const CACHE_NAME = 'bilyard-klub-v2'; // Updated cache name
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -15,11 +16,24 @@ self.addEventListener('install', event => {
   );
 });
 
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+      );
+    })
+  );
+});
+
 self.addEventListener('fetch', event => {
+  // Network-First strategy
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        // Option to dynamically cache fetched assets could go here
+        return response;
       })
+      .catch(() => caches.match(event.request))
   );
 });
