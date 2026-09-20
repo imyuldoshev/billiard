@@ -52,10 +52,38 @@ function checkAuth() {
   }
 }
 
+loginPhone?.addEventListener("input", () => {
+  let val = loginPhone.value.replace(/[^\d]/g, ""); // Remove non-digits
+  
+  if (!val.startsWith("998")) {
+    // If they delete 998, put it back
+    if (val.length < 3) val = "998"; 
+    else val = "998" + val;
+  }
+  
+  if (val.length > 12) {
+    val = val.substring(0, 12);
+  }
+  
+  let formatted = "+998 ";
+  if (val.length > 3) formatted += val.substring(3, 5);
+  if (val.length > 5) formatted += " " + val.substring(5, 8);
+  if (val.length > 8) formatted += " " + val.substring(8, 10);
+  if (val.length > 10) formatted += " " + val.substring(10, 12);
+  
+  loginPhone.value = formatted;
+});
+
+loginPhone?.addEventListener("focus", () => {
+  if (loginPhone.value.trim() === "" || loginPhone.value.trim() === "+") {
+    loginPhone.value = "+998 ";
+  }
+});
+
 loginNextBtn?.addEventListener("click", async () => {
   const phone = loginPhone.value.trim();
-  if (phone.length < 9) {
-    showDialog({ type: "alert", message: "To'g'ri telefon raqam kiriting!" });
+  if (phone.length !== 17) {
+    showDialog({ type: "alert", message: "Telefon raqamni to'liq kiriting!" });
     return;
   }
   loginNextBtn.textContent = "Tekshirilmoqda...";
