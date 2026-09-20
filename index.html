@@ -101,7 +101,7 @@
 
         <!-- TARIX TAB -->
         <section id="tab-history" class="tab-pane">
-          <div class="history-top-bar" style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center;">
+          <div class="history-top-bar" style="display: flex; gap: 12px; margin-bottom: 24px; align-items: center;">
             <div class="segment-control tab-segment" style="flex: 1; margin-bottom: 0;">
               <button class="seg-btn active" data-view="hist-today-view">
                 Bugun
@@ -126,13 +126,15 @@
 
           <div id="hist-today-view" class="view-pane active">
             <div class="history-summary">
-              <span id="historyCountLabel">0 ta o'yin</span>
+              <span id="historyCountLabel" class="history-count"
+                >0 ta o'yin</span
+              >
             </div>
-            <div id="historyWrap" class="history-list"></div>
+            <div id="historyWrap" class="history-wrap"></div>
           </div>
 
-          <div id="hist-month-view" class="view-pane" style="display: none">
-            <div id="monthlyArchiveList" class="history-list"></div>
+          <div id="hist-month-view" class="view-pane">
+            <div id="monthlyArchiveList" class="history-wrap"></div>
           </div>
         </section>
 
