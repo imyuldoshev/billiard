@@ -39,6 +39,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: auto; /* Enable native pull to refresh */
+  overflow-x: hidden;
 }
 
 .app {
