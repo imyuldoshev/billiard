@@ -24,6 +24,112 @@ import { checkAndArchiveShift, checkAndArchiveMonth } from "./lib/archivation";
 import { showDialog } from "./ui/dialog";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { checkPhoneExists, registerUser, verifyPin } from "./api/auth";
+
+// Auth Initialization
+const loginScreen = document.getElementById("loginScreen") as HTMLElement;
+const appContainer = document.getElementById("app") as HTMLElement;
+const loginStep1 = document.getElementById("loginStep1") as HTMLElement;
+const loginStep2 = document.getElementById("loginStep2") as HTMLElement;
+const loginPhone = document.getElementById("loginPhone") as HTMLInputElement;
+const loginPin = document.getElementById("loginPin") as HTMLInputElement;
+const loginNextBtn = document.getElementById("loginNextBtn") as HTMLButtonElement;
+const loginSubmitBtn = document.getElementById("loginSubmitBtn") as HTMLButtonElement;
+const loginBackBtn = document.getElementById("loginBackBtn") as HTMLButtonElement;
+const loginPinText = document.getElementById("loginPinText") as HTMLElement;
+
+let currentAuthPhone = "";
+let isNewUser = false;
+
+function checkAuth() {
+  const loggedIn = localStorage.getItem("currentUser");
+  if (loggedIn) {
+    loginScreen.style.display = "none";
+    appContainer.style.display = "block";
+  } else {
+    loginScreen.style.display = "flex";
+    appContainer.style.display = "none";
+  }
+}
+
+loginNextBtn?.addEventListener("click", async () => {
+  const phone = loginPhone.value.trim();
+  if (phone.length < 9) {
+    showDialog({ type: "alert", message: "To'g'ri telefon raqam kiriting!" });
+    return;
+  }
+  loginNextBtn.textContent = "Tekshirilmoqda...";
+  loginNextBtn.disabled = true;
+  
+  const exists = await checkPhoneExists(phone);
+  currentAuthPhone = phone;
+  isNewUser = !exists;
+  
+  loginNextBtn.textContent = "Davom etish";
+  loginNextBtn.disabled = false;
+  
+  loginStep1.style.display = "none";
+  loginStep2.style.display = "block";
+  loginPin.value = "";
+  
+  if (isNewUser) {
+    loginPinText.textContent = "Siz yangi foydalanuvchisiz. O'zingiz uchun 4 xonali yangi PIN kod o'rnating:";
+    loginSubmitBtn.textContent = "Ro'yxatdan o'tish";
+  } else {
+    loginPinText.textContent = "PIN kodni kiriting:";
+    loginSubmitBtn.textContent = "Kirish";
+  }
+});
+
+loginBackBtn?.addEventListener("click", () => {
+  loginStep2.style.display = "none";
+  loginStep1.style.display = "block";
+});
+
+loginSubmitBtn?.addEventListener("click", async () => {
+  const pin = loginPin.value.trim();
+  if (pin.length !== 4) {
+    showDialog({ type: "alert", message: "PIN kod 4 xonali bo'lishi kerak!" });
+    return;
+  }
+  
+  loginSubmitBtn.disabled = true;
+  
+  if (isNewUser) {
+    loginSubmitBtn.textContent = "Yaratilmoqda...";
+    const success = await registerUser(currentAuthPhone, pin);
+    if (success) {
+      localStorage.setItem("currentUser", currentAuthPhone);
+      checkAuth();
+    } else {
+      showDialog({ type: "alert", message: "Xatolik yuz berdi. Qaytadan urinib ko'ring." });
+    }
+  } else {
+    loginSubmitBtn.textContent = "Tekshirilmoqda...";
+    const isValid = await verifyPin(currentAuthPhone, pin);
+    if (isValid) {
+      localStorage.setItem("currentUser", currentAuthPhone);
+      checkAuth();
+    } else {
+      showDialog({ type: "alert", message: "PIN kod noto'g'ri!" });
+    }
+  }
+  
+  loginSubmitBtn.disabled = false;
+  if (isNewUser) loginSubmitBtn.textContent = "Ro'yxatdan o'tish";
+  else loginSubmitBtn.textContent = "Kirish";
+});
+
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  showDialog({
+    type: "confirm",
+    message: "Haqiqatan ham tizimdan chiqmoqchimisiz?",
+    onConfirm: () => {
+      localStorage.removeItem("currentUser");
+      window.location.reload();
+    }
+  });
+});
 
 // Initialization
 const tablesGrid = document.getElementById("tablesGrid") as HTMLElement;
@@ -724,3 +830,4 @@ document
   );
 
 initApp();
+checkAuth();

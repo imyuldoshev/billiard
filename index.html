@@ -26,7 +26,31 @@
     <link rel="stylesheet" href="/src/style.css?v=3" />
   </head>
   <body>
-    <div class="app">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-screen">
+      <div class="login-box">
+        <h2 style="margin-bottom: 24px; text-align: center;">Tizimga kirish</h2>
+        
+        <div id="loginStep1">
+          <div class="field-group">
+            <label>Telefon raqam</label>
+            <input type="tel" id="loginPhone" class="input" placeholder="+998 90 123 45 67" />
+          </div>
+          <button class="btn btn-primary" id="loginNextBtn" style="width: 100%;">Davom etish</button>
+        </div>
+
+        <div id="loginStep2" style="display: none;">
+          <p style="text-align: center; color: var(--text-dim); margin-bottom: 16px; font-size: 14px;" id="loginPinText">PIN kodni kiriting</p>
+          <div class="field-group">
+            <input type="password" id="loginPin" class="input" placeholder="****" inputmode="numeric" maxlength="4" style="text-align: center; font-size: 24px; letter-spacing: 8px;" />
+          </div>
+          <button class="btn btn-primary" id="loginSubmitBtn" style="width: 100%;">Kirish</button>
+          <button class="btn btn-outline" id="loginBackBtn" style="width: 100%; margin-top: 12px; border-color: transparent;">Raqamni o'zgartirish</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="app" class="app-container" style="display: none;">
       <main class="content">
         <!-- STOLLAR TAB -->
         <section id="tab-tables" class="tab-pane active">
@@ -169,6 +193,18 @@
             >
               <button class="btn btn-outline" id="dailyArchiveBtn">
                 Kunlik arxivlar (Tarix)
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <label>Akkaunt</label>
+            <div
+              class="row"
+              style="flex-direction: column; gap: 8px; margin-top: 8px"
+            >
+              <button class="btn btn-outline" style="color: var(--red-occ); border-color: var(--red-occ);" id="logoutBtn">
+                Tizimdan chiqish
               </button>
             </div>
           </div>
