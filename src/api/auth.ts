@@ -3,41 +3,65 @@ import { supabase } from "../lib/supabase";
 export async function checkPhoneExists(phone: string): Promise<boolean> {
   if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) return false;
   
-  const { data, error } = await supabase
-    .from("users")
-    .select("phone")
-    .eq("phone", phone)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("phone")
+      .eq("phone", phone)
+      .maybeSingle();
 
-  if (error) return false;
-  return !!data;
+    if (error) return false;
+    return !!data;
+  } catch (e) {
+    // Oflayn bo'lsa va bu nomer telefonda oldin kirilgan bo'lsa, uni bor deb hisoblaymiz
+    return !!localStorage.getItem("offline_pin_" + phone);
+  }
 }
 
 export async function registerUser(phone: string, pin: string): Promise<boolean> {
   if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) return false;
   
-  const { error } = await supabase.from("users").insert({
-    phone,
-    pin
-  });
+  try {
+    const { error } = await supabase.from("users").insert({
+      phone,
+      pin
+    });
 
-  if (error) {
-    console.error("Ro'yxatdan o'tishda xatolik:", error);
-    return false;
+    if (error) {
+      console.error("Ro'yxatdan o'tishda xatolik:", error);
+      return false;
+    }
+    // Lokal xotiraga oflayn kirish uchun saqlab qo'yamiz (btoa bilan engil shifrlab)
+    localStorage.setItem("offline_pin_" + phone, btoa(pin));
+    return true;
+  } catch (e) {
+    return false; // Oflayn ro'yxatdan o'tib bo'lmaydi
   }
-  return true;
 }
 
 export async function verifyPin(phone: string, pin: string): Promise<boolean> {
   if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) return false;
   
-  const { data, error } = await supabase
-    .from("users")
-    .select("pin")
-    .eq("phone", phone)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("pin")
+      .eq("phone", phone)
+      .maybeSingle();
 
-  if (error || !data) return false;
-  
-  return data.pin === pin;
+    if (error || !data) return false;
+    
+    if (data.pin === pin) {
+      localStorage.setItem("offline_pin_" + phone, btoa(pin));
+      return true;
+    }
+    return false;
+  } catch (e) {
+    // Tarmoq xatosi (Oflayn rejim). Lokal xotiradan tekshiramiz
+    const savedPin = localStorage.getItem("offline_pin_" + phone);
+    if (savedPin && atob(savedPin) === pin) {
+      return true;
+    }
+    return false;
+  }
 }

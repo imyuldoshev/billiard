@@ -306,11 +306,15 @@ async function initApp() {
 
   hourlyRateInput.value = state.hourlyRate.toString();
 
-  await Promise.all([
-    loadSessionsFromSupabase(),
-    loadBarItems(),
-    checkAndArchiveShift(),
-  ]);
+  try {
+    await Promise.all([
+      loadSessionsFromSupabase(),
+      loadBarItems(),
+      checkAndArchiveShift(),
+    ]);
+  } catch (err) {
+    console.error("Tarmoq xatosi yoki yuklashda xatolik:", err);
+  }
 
   onRender();
   renderBarMenu();
@@ -473,6 +477,11 @@ function renderHistory() {
     } else {
       monthlyArchiveList.innerHTML = html;
     }
+  }).catch((err) => {
+    console.error("Arxivlarni yuklashda xatolik (Oflayn bo'lishingiz mumkin):", err);
+    monthlyArchiveList.innerHTML = `<div class="empty-state">
+      <div>Oflayn rejim. Ma'lumotlarni yuklab bo'lmadi.</div>
+    </div>`;
   });
 }
 
