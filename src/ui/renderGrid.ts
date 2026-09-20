@@ -9,7 +9,6 @@ export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
     onRenderStats();
   };
 
-  console.log("renderGrid called! Tables count: ", state.tables.length);
   state.tables.forEach(t => {
     try {
       const card = buildCard(t, onRender);

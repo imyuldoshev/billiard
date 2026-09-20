@@ -13,10 +13,10 @@ export async function saveSessionToSupabase(session: Session) {
     started_at: new Date(session.startedAt).toISOString(),
     ended_at: new Date(session.endedAt).toISOString(),
     duration_ms: session.durationMs,
-    amount: session.amount,
+    amount: Math.round(session.amount),
     pause_duration_ms: session.pauseDurationMs,
-    bar_amount: session.barAmount,
-    total_amount: session.totalAmount,
+    bar_amount: Math.round(session.barAmount),
+    total_amount: Math.round(session.totalAmount),
     payment_method: session.paymentMethod || 'cash'
   });
   if (error) console.error('Supabase seansni saqlashda xatolik:', error);
