@@ -53,6 +53,8 @@ navItems.forEach((item) => {
     tabPanes.forEach((p) => p.classList.remove("active"));
     document.getElementById(targetId)?.classList.add("active");
 
+    localStorage.setItem("activeTab", targetId);
+
     if (targetId === "tab-bar") updateBarSellView();
     if (targetId === "tab-history") renderHistory();
   });
@@ -76,6 +78,7 @@ document.querySelectorAll(".tab-segment").forEach((seg) => {
           .forEach((v) => v.classList.remove("active", "fade-in"));
         const v = document.getElementById(targetView);
         if (v) v.classList.add("active");
+        localStorage.setItem("activeSegment_" + parentPane.id, targetView);
       }
     });
   });
@@ -134,6 +137,23 @@ async function initApp() {
   onRender();
   renderBarMenu();
   renderHistory();
+
+  // Restore tab and segment state
+  const activeTab = localStorage.getItem("activeTab");
+  if (activeTab) {
+    const tabBtn = document.querySelector(`[data-target="${activeTab}"]`) as HTMLElement;
+    if (tabBtn) tabBtn.click();
+  }
+  const barSegment = localStorage.getItem("activeSegment_tab-bar");
+  if (barSegment) {
+    const btn = document.querySelector(`[data-view="${barSegment}"]`) as HTMLElement;
+    if (btn) btn.click();
+  }
+  const historySegment = localStorage.getItem("activeSegment_tab-history");
+  if (historySegment) {
+    const btn = document.querySelector(`[data-view="${historySegment}"]`) as HTMLElement;
+    if (btn) btn.click();
+  }
 }
 
 // History
