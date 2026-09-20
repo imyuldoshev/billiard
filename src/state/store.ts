@@ -2,7 +2,7 @@ import type { AppState, Session } from "../types";
 
 export const TABLE_COUNT = 4;
 export const DAILY_REVENUE_PERIOD_MS = 24 * 60 * 60 * 1000;
-const STORAGE_KEY = "bilyard-klub-state-v3";
+const getStorageKey = () => "bilyard-klub-state-v3-" + (localStorage.getItem("currentUser") || "default");
 
 export const state: AppState & {
   dailyRevenueResetAtByDate: Record<string, number>;
@@ -30,7 +30,7 @@ export const state: AppState & {
 
 export function loadState(): void {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
@@ -55,6 +55,14 @@ export function loadState(): void {
             parsed.dailyRevenuePeriodStartedAt;
         }
       }
+    } else {
+      // If no state exists for this user, we must clear the current state so it doesn't bleed over from previous user memory
+      state.history = [];
+      state.tables.forEach(t => {
+        t.occupied = false;
+        t.startTime = null;
+        t.barOrders = [];
+      });
     }
   } catch (e) {
     console.error("Holatni yuklashda xatolik:", e);
@@ -63,7 +71,7 @@ export function loadState(): void {
 
 export function saveState(): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(getStorageKey(), JSON.stringify(state));
   } catch (e) {
     console.error("Holatni saqlashda xatolik:", e);
   }

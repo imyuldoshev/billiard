@@ -5,12 +5,14 @@ import type { Session } from "../types";
 let sessionRefreshInProgress = false;
 
 export async function saveSessionToSupabase(session: Session) {
+  const userId = localStorage.getItem("currentUser");
+  if (!userId) return;
   if (
     !import.meta.env.VITE_SUPABASE_URL ||
     !import.meta.env.VITE_SUPABASE_URL.startsWith("http")
   )
     return;
-  const { error } = await supabase.from("table_sessions").insert({
+  const { error } = await supabase.from("table_sessions").upsert({
     id: session.id,
     table_id: session.tableId,
     customer_name: session.customerName || "",
@@ -22,11 +24,18 @@ export async function saveSessionToSupabase(session: Session) {
     bar_amount: Math.round(session.barAmount),
     total_amount: Math.round(session.totalAmount),
     payment_method: session.paymentMethod || "cash",
+    user_id: userId,
   });
   if (error) console.error("Supabase seansni saqlashda xatolik:", error);
 }
 
 export async function loadSessionsFromSupabase(onComplete?: () => void) {
+  const userId = localStorage.getItem("currentUser");
+  if (!userId) {
+    if (onComplete) onComplete();
+    return;
+  }
+  
   if (sessionRefreshInProgress) {
     if (onComplete) onComplete();
     return;
@@ -45,6 +54,7 @@ export async function loadSessionsFromSupabase(onComplete?: () => void) {
     .select(
       "id, table_id, customer_name, started_at, ended_at, duration_ms, amount, pause_duration_ms, bar_amount, total_amount, payment_method",
     )
+    .eq("user_id", userId)
     .order("ended_at", { ascending: false })
     .limit(500);
 

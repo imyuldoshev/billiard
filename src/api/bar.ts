@@ -2,6 +2,9 @@ import { supabase } from "../lib/supabase";
 import type { BarItem, BarOrder } from "../types";
 
 export async function loadBarItems(): Promise<BarItem[]> {
+  const userId = localStorage.getItem("currentUser");
+  if (!userId) return [];
+
   if (
     !import.meta.env.VITE_SUPABASE_URL ||
     !import.meta.env.VITE_SUPABASE_URL.startsWith("http")
@@ -10,6 +13,7 @@ export async function loadBarItems(): Promise<BarItem[]> {
   const { data, error } = await supabase
     .from("bar_items")
     .select("*")
+    .eq("user_id", userId)
     .order("name");
   if (error) {
     console.error("Bar mahsulotlarini yuklashda xatolik:", error);
@@ -27,6 +31,9 @@ export async function loadBarItems(): Promise<BarItem[]> {
 export async function addBarItem(
   item: Omit<BarItem, "id" | "isActive">,
 ): Promise<BarItem | null> {
+  const userId = localStorage.getItem("currentUser");
+  if (!userId) return null;
+
   const localFallback: BarItem = {
     id: "local_" + Date.now().toString(),
     name: item.name,
@@ -41,7 +48,12 @@ export async function addBarItem(
     return localFallback;
   const { data, error } = await supabase
     .from("bar_items")
-    .insert({ name: item.name, price: item.price, category: item.category })
+    .insert({ 
+      name: item.name, 
+      price: item.price, 
+      category: item.category,
+      user_id: userId
+    })
     .select()
     .single();
 
@@ -62,6 +74,9 @@ export async function updateBarItem(
   id: string,
   updates: Partial<BarItem>,
 ): Promise<boolean> {
+  const userId = localStorage.getItem("currentUser");
+  if (!userId) return false;
+
   if (
     !import.meta.env.VITE_SUPABASE_URL ||
     !import.meta.env.VITE_SUPABASE_URL.startsWith("http")
@@ -76,7 +91,8 @@ export async function updateBarItem(
   const { error } = await supabase
     .from("bar_items")
     .update(dbUpdates)
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", userId);
 
   if (error) {
     console.error("Mahsulotni yangilashda xatolik, lokal o`zgaradi:", error);
