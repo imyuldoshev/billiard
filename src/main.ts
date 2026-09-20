@@ -22,6 +22,8 @@ import { renderGrid } from "./ui/renderGrid";
 import { setOpenCheckoutCallback } from "./ui/tableActions";
 import { checkAndArchiveShift, checkAndArchiveMonth } from "./lib/archivation";
 import { showDialog } from "./ui/dialog";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Initialization
 const tablesGrid = document.getElementById("tablesGrid") as HTMLElement;
@@ -82,6 +84,45 @@ document.querySelectorAll(".tab-segment").forEach((seg) => {
       }
     });
   });
+});
+
+// Export PDF Logic
+document.getElementById("exportBtn")?.addEventListener("click", () => {
+  const todayHistory = getTodayHistory();
+  
+  if (todayHistory.length === 0) {
+    showDialog({ type: "alert", message: "Eksport qilish uchun ma'lumot yo'q!" });
+    return;
+  }
+
+  const doc = new jsPDF();
+  
+  const tableData = todayHistory.map(h => {
+    const startStr = new Date(h.startedAt).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+    const endStr = new Date(h.endedAt).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+    return [
+      `${h.tableId}-stol`,
+      startStr,
+      endStr,
+      formatDuration(h.durationMs),
+      h.amount.toLocaleString("ru-RU"),
+      h.barAmount.toLocaleString("ru-RU"),
+      h.totalAmount.toLocaleString("ru-RU"),
+      h.paymentMethod === 'card' ? 'Karta' : 'Naqd',
+      h.customerName || ""
+    ];
+  });
+
+  autoTable(doc, {
+    head: [['Stol', 'Boshlandi', 'Tugadi', 'Vaqt', 'O\'yin', 'Bar', 'Jami', 'To\'lov', 'Mijoz']],
+    body: tableData,
+    theme: 'grid',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [41, 128, 185] }
+  });
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  doc.save(`Billiard-Hisobot-${dateStr}.pdf`);
 });
 
 // App State Updates
