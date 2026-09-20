@@ -644,12 +644,13 @@ body {
 }
 .sticky-bottom-bar {
   position: sticky;
-  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 16px);
   background: var(--bg-surface);
   padding: 16px;
-  margin: 0 -16px;
-  border-top: 1px solid var(--border-soft);
+  border-radius: 16px;
+  border: 1px solid var(--border-soft);
   z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 .sticky-bottom-bar .row {
   justify-content: space-between;
