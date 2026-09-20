@@ -5,6 +5,7 @@ import type { Session } from '../types';
 let sessionRefreshInProgress = false;
 
 export async function saveSessionToSupabase(session: Session) {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return;
   const { error } = await supabase.from('table_sessions').insert({
     id: session.id,
     table_id: session.tableId,
@@ -22,6 +23,10 @@ export async function saveSessionToSupabase(session: Session) {
 
 export async function loadSessionsFromSupabase(onComplete?: () => void) {
   if (sessionRefreshInProgress) return;
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) {
+    if (onComplete) onComplete();
+    return;
+  }
   sessionRefreshInProgress = true;
 
   const { data, error } = await supabase
@@ -62,6 +67,7 @@ export async function loadSessionsFromSupabase(onComplete?: () => void) {
 }
 
 export async function deleteSessionFromSupabase(id: string) {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return true;
   const { error } = await supabase.from('table_sessions').delete().eq('id', id);
   if (error) {
     console.error('Seansni ochirishda xatolik:', error);

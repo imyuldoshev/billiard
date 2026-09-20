@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import type { BarItem, BarOrder } from '../types';
 
 export async function loadBarItems(): Promise<BarItem[]> {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return [];
   const { data, error } = await supabase
     .from('bar_items')
     .select('*')
@@ -20,6 +21,7 @@ export async function loadBarItems(): Promise<BarItem[]> {
 }
 
 export async function addBarItem(item: Omit<BarItem, 'id' | 'isActive'>): Promise<BarItem | null> {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return null;
   const { data, error } = await supabase
     .from('bar_items')
     .insert({ name: item.name, price: item.price, category: item.category })
@@ -40,6 +42,7 @@ export async function addBarItem(item: Omit<BarItem, 'id' | 'isActive'>): Promis
 }
 
 export async function updateBarItem(id: string, updates: Partial<BarItem>): Promise<boolean> {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return false;
   const dbUpdates: any = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.price !== undefined) dbUpdates.price = updates.price;
@@ -60,6 +63,7 @@ export async function updateBarItem(id: string, updates: Partial<BarItem>): Prom
 
 export async function saveBarOrders(sessionId: string, orders: BarOrder[]): Promise<void> {
   if (orders.length === 0) return;
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return;
   const rows = orders.map(o => ({
     session_id: sessionId,
     item_id: o.itemId,

@@ -9,7 +9,13 @@ export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
     onRenderStats();
   };
 
+  console.log("renderGrid called! Tables count: ", state.tables.length);
   state.tables.forEach(t => {
-    gridEl.appendChild(buildCard(t, onRender));
+    try {
+      const card = buildCard(t, onRender);
+      gridEl.appendChild(card);
+    } catch (e) {
+      console.error("Error building card for table", t.id, e);
+    }
   });
 }
