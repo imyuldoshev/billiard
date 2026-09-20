@@ -9,6 +9,7 @@ import { setOpenCheckoutCallback } from './ui/tableActions';
 import { renderStats } from './ui/renderHeader';
 import { openDailyArchive, openMonthlyArchive } from './ui/renderReports';
 import { checkAndArchiveShift, checkAndArchiveMonth } from './lib/archivation';
+import { showDialog } from './ui/dialog';
 import type { Session } from './types';
 
 const grid = document.getElementById('tablesGrid') as HTMLElement;
@@ -94,17 +95,23 @@ function renderHistory() {
   `;
 
   historyWrap.querySelectorAll('.delete-history-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', (e) => {
       const id = (e.currentTarget as HTMLButtonElement).dataset.id;
       if (!id) return;
-      if (!confirm('Rostdan ham ushbu yozuvni o\'chirmoqchimisiz?')) return;
-      const success = await deleteSessionFromSupabase(id);
-      if (success) {
-        state.history = state.history.filter(s => s.id !== id);
-        saveState();
-        updateStats();
-        renderHistory();
-      }
+      
+      showDialog({
+        type: 'confirm',
+        message: 'Rostdan ham ushbu yozuvni o\'chirmoqchimisiz?',
+        onConfirm: async () => {
+          const success = await deleteSessionFromSupabase(id);
+          if (success) {
+            state.history = state.history.filter(s => s.id !== id);
+            saveState();
+            updateStats();
+            renderHistory();
+          }
+        }
+      });
     });
   });
 }

@@ -1,5 +1,6 @@
 import { state, saveState } from '../state/store';
 import { formatMoney } from '../lib/calculations';
+import { showDialog } from './dialog';
 
 
 const overlay = document.getElementById('barOrderOverlay') as HTMLElement;
@@ -18,7 +19,10 @@ export function openBarOrder(onConfirm?: () => void) {
   select.innerHTML = '';
   const occupiedTables = state.tables.filter(t => t.occupied);
   if (occupiedTables.length === 0) {
-    alert("Barcha stollar bo'sh. Avval stolni boshlang!");
+    showDialog({
+      type: 'alert',
+      message: "Barcha stollar bo'sh. Avval stolni boshlang!"
+    });
     return;
   }
 
