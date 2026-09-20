@@ -16,16 +16,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/src/style.css?v=2">
 
-<!-- PWA uchun: Service Worker'ni ro'yxatdan o'tkazish -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-          console.log('ServiceWorker muvaffaqiyatli ishladi');
-        })
         .catch(err => {
-          console.log('ServiceWorker xatosi:', err);
+          console.error('ServiceWorker xatosi:', err);
         });
     });
   }
