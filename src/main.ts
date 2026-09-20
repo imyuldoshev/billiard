@@ -201,7 +201,7 @@ function confirmPayment(method: 'cash' | 'card') {
     customerName, 
     durationMs, 
     amount, 
-    startedAt: new Date(Number(startedAt)).toISOString(), 
+    startedAt: new Date(isNaN(Number(startedAt)) ? startedAt : Number(startedAt)).toISOString(), 
     endedAt,
     pauseDurationMs: pauseDurationMs || 0,
     barAmount: barAmount || 0,

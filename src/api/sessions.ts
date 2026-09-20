@@ -16,6 +16,7 @@ export async function saveSessionToSupabase(session: Session) {
     amount: session.amount,
     pause_duration_ms: session.pauseDurationMs,
     bar_amount: session.barAmount,
+    total_amount: session.totalAmount,
     payment_method: session.paymentMethod || 'cash'
   });
   if (error) console.error('Supabase seansni saqlashda xatolik:', error);

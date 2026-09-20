@@ -25,14 +25,19 @@ import type { Table } from '../types';
 
 export function getEffectiveDuration(table: Table): number {
   if (!table.startTime) return 0;
-  const start = new Date(table.startTime).getTime();
+  
+  let start = Number(table.startTime);
+  if (isNaN(start)) start = new Date(table.startTime).getTime();
+  
   const now = Date.now();
   let duration = now - start - table.totalPauseDurationMs;
+  
   if (table.isPaused && table.pauseStartTime) {
-    const pStart = new Date(table.pauseStartTime).getTime();
+    let pStart = Number(table.pauseStartTime);
+    if (isNaN(pStart)) pStart = new Date(table.pauseStartTime).getTime();
     duration -= (now - pStart);
   }
-  return Math.max(0, duration);
+  return Math.max(0, duration || 0);
 }
 
 // Smena (shift) har doim 09:00 da boshlanadi
