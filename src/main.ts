@@ -24,6 +24,9 @@ import { checkAndArchiveShift, checkAndArchiveMonth } from "./lib/archivation";
 import { showDialog } from "./ui/dialog";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { registerSW } from "virtual:pwa-register";
+
+registerSW({ immediate: true });
 import { checkPhoneExists, registerUser, verifyPin } from "./api/auth";
 
 // Auth Initialization
