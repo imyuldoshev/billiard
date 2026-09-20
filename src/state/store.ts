@@ -1,8 +1,8 @@
-import type { AppState, Session } from '../types';
+import type { AppState, Session } from "../types";
 
 export const TABLE_COUNT = 4;
 export const DAILY_REVENUE_PERIOD_MS = 24 * 60 * 60 * 1000;
-const STORAGE_KEY = 'bilyard-klub-state-v3';
+const STORAGE_KEY = "bilyard-klub-state-v3";
 
 export const state: AppState & {
   dailyRevenueResetAtByDate: Record<string, number>;
@@ -18,14 +18,14 @@ export const state: AppState & {
     isPaused: false,
     pauseStartTime: null,
     totalPauseDurationMs: 0,
-    barOrders: []
+    barOrders: [],
   })),
   history: [],
   barItems: [],
   dailyReports: [],
   monthlyReports: [],
   dailyRevenueResetAtByDate: {},
-  dailyRevenuePeriodStartedAt: null
+  dailyRevenuePeriodStartedAt: null,
 };
 
 export function loadState(): void {
@@ -33,23 +33,31 @@ export function loadState(): void {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        if (typeof parsed.hourlyRate === 'number') state.hourlyRate = parsed.hourlyRate;
-        if (Array.isArray(parsed.tables) && parsed.tables.length === TABLE_COUNT) {
+      if (parsed && typeof parsed === "object") {
+        if (typeof parsed.hourlyRate === "number")
+          state.hourlyRate = parsed.hourlyRate;
+        if (
+          Array.isArray(parsed.tables) &&
+          parsed.tables.length === TABLE_COUNT
+        ) {
           state.tables = parsed.tables;
         }
         if (Array.isArray(parsed.history)) state.history = parsed.history;
         if (Array.isArray(parsed.barItems)) state.barItems = parsed.barItems;
-        if (parsed.dailyRevenueResetAtByDate && typeof parsed.dailyRevenueResetAtByDate === 'object') {
+        if (
+          parsed.dailyRevenueResetAtByDate &&
+          typeof parsed.dailyRevenueResetAtByDate === "object"
+        ) {
           state.dailyRevenueResetAtByDate = parsed.dailyRevenueResetAtByDate;
         }
-        if (typeof parsed.dailyRevenuePeriodStartedAt === 'number') {
-          state.dailyRevenuePeriodStartedAt = parsed.dailyRevenuePeriodStartedAt;
+        if (typeof parsed.dailyRevenuePeriodStartedAt === "number") {
+          state.dailyRevenuePeriodStartedAt =
+            parsed.dailyRevenuePeriodStartedAt;
         }
       }
     }
   } catch (e) {
-    console.error('Holatni yuklashda xatolik:', e);
+    console.error("Holatni yuklashda xatolik:", e);
   }
 }
 
@@ -57,18 +65,16 @@ export function saveState(): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
-    console.error('Holatni saqlashda xatolik:', e);
+    console.error("Holatni saqlashda xatolik:", e);
   }
 }
 
-
-
-import { getCurrentShiftStart, getCurrentShiftEnd } from '../lib/calculations';
+import { getCurrentShiftStart, getCurrentShiftEnd } from "../lib/calculations";
 
 export function getTodayHistory(): Session[] {
   const shiftStart = getCurrentShiftStart();
   const shiftEnd = getCurrentShiftEnd(shiftStart);
-  return state.history.filter(h => {
+  return state.history.filter((h) => {
     const endMs = new Date(h.endedAt).getTime();
     return endMs >= shiftStart && endMs < shiftEnd;
   });
@@ -79,8 +85,8 @@ export function computeDailyRevenue() {
 }
 
 export function getMonthHistory(monthValue: string): Session[] {
-  const [year, month] = monthValue.split('-').map(Number);
-  return state.history.filter(h => {
+  const [year, month] = monthValue.split("-").map(Number);
+  return state.history.filter((h) => {
     const date = new Date(h.endedAt);
     return date.getFullYear() === year && date.getMonth() + 1 === month;
   });

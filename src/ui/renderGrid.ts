@@ -1,15 +1,15 @@
-import { state } from '../state/store';
-import { buildCard } from './renderCard';
+import { state } from "../state/store";
+import { buildCard } from "./renderCard";
 
 export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
-  gridEl.innerHTML = '';
-  
+  gridEl.innerHTML = "";
+
   const onRender = () => {
     renderGrid(gridEl, onRenderStats);
     onRenderStats();
   };
 
-  state.tables.forEach(t => {
+  state.tables.forEach((t) => {
     try {
       const card = buildCard(t, onRender);
       gridEl.appendChild(card);

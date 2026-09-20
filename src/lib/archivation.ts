@@ -1,18 +1,20 @@
-import { state, saveState } from '../state/store';
-import { saveDailyReport } from '../api/reports';
-import { getCurrentShiftStart, getCurrentShiftEnd } from './calculations';
-import type { DailyReport, Session } from '../types';
+import { state, saveState } from "../state/store";
+import { saveDailyReport } from "../api/reports";
+import { getCurrentShiftStart, getCurrentShiftEnd } from "./calculations";
+import type { DailyReport, Session } from "../types";
 
 export async function checkAndArchiveShift() {
   const currentShiftStart = getCurrentShiftStart();
-  
+
   // O'tgan smenalar (hozirgi smenadan oldingi barcha tugagan seanslar)
-  const pastSessions = state.history.filter(h => new Date(h.endedAt).getTime() < currentShiftStart);
+  const pastSessions = state.history.filter(
+    (h) => new Date(h.endedAt).getTime() < currentShiftStart,
+  );
   if (pastSessions.length === 0) return;
 
   // Guruhlash: Har bir smena (kun) uchun alohida arxiv
   const byShift: Record<string, Session[]> = {};
-  pastSessions.forEach(s => {
+  pastSessions.forEach((s) => {
     // Seans qaysi smenaga tegishli ekanligini topamiz
     const sTime = new Date(s.endedAt).getTime();
     const shiftStart = getCurrentShiftStart(sTime);
@@ -23,7 +25,9 @@ export async function checkAndArchiveShift() {
 
   for (const dateKey in byShift) {
     const shiftSessions = byShift[dateKey];
-    const shiftStartMs = getCurrentShiftStart(new Date(shiftSessions[0].endedAt).getTime());
+    const shiftStartMs = getCurrentShiftStart(
+      new Date(shiftSessions[0].endedAt).getTime(),
+    );
     const shiftEndMs = getCurrentShiftEnd(shiftStartMs);
 
     let gameRevenue = 0;
@@ -31,10 +35,10 @@ export async function checkAndArchiveShift() {
     let cashAmount = 0;
     let cardAmount = 0;
 
-    shiftSessions.forEach(s => {
+    shiftSessions.forEach((s) => {
       gameRevenue += s.amount;
       barRevenue += s.barAmount;
-      if (s.paymentMethod === 'card') cardAmount += s.totalAmount;
+      if (s.paymentMethod === "card") cardAmount += s.totalAmount;
       else cashAmount += s.totalAmount;
     });
 
@@ -48,7 +52,7 @@ export async function checkAndArchiveShift() {
       barRevenue,
       totalRevenue: gameRevenue + barRevenue,
       cashAmount,
-      cardAmount
+      cardAmount,
     };
 
     // Saqlash (agar bazada bo'lsa xato berishi mumkin, e'tibor bermaymiz)
@@ -56,12 +60,14 @@ export async function checkAndArchiveShift() {
   }
 
   // Local state dan o'tgan smenalarni o'chiramiz va faqat joriy smenani qoldiramiz
-  state.history = state.history.filter(h => new Date(h.endedAt).getTime() >= currentShiftStart);
+  state.history = state.history.filter(
+    (h) => new Date(h.endedAt).getTime() >= currentShiftStart,
+  );
   saveState();
 }
 
-import { loadDailyReports, saveMonthlyReport } from '../api/reports';
-import type { MonthlyReport } from '../types';
+import { loadDailyReports, saveMonthlyReport } from "../api/reports";
+import type { MonthlyReport } from "../types";
 
 export async function checkAndArchiveMonth() {
   const now = new Date();
@@ -71,19 +77,19 @@ export async function checkAndArchiveMonth() {
     yesterday.setDate(0); // oldingi oyning oxirgi kuni
     const targetYear = yesterday.getFullYear();
     const targetMonth = yesterday.getMonth() + 1; // 1-12
-    const reportLabel = `${targetYear}-${String(targetMonth).padStart(2, '0')}`;
+    const reportLabel = `${targetYear}-${String(targetMonth).padStart(2, "0")}`;
     const reportId = `monthly-${reportLabel}`;
 
     const last30 = await loadDailyReports(31);
-    const monthReports = last30.filter(r => {
+    const monthReports = last30.filter((r) => {
       const d = new Date(r.shiftStart);
-      return d.getFullYear() === targetYear && (d.getMonth() + 1) === targetMonth;
+      return d.getFullYear() === targetYear && d.getMonth() + 1 === targetMonth;
     });
 
     if (monthReports.length > 0) {
       let totalSessions = 0;
       let totalRevenue = 0;
-      monthReports.forEach(r => {
+      monthReports.forEach((r) => {
         totalSessions += r.totalSessions;
         totalRevenue += r.totalRevenue;
       });
@@ -95,7 +101,7 @@ export async function checkAndArchiveMonth() {
         reportLabel,
         totalSessions,
         totalRevenue,
-        workingDays: monthReports.length
+        workingDays: monthReports.length,
       };
 
       await saveMonthlyReport(report);

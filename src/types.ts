@@ -1,5 +1,3 @@
-
-
 export interface BarOrder {
   itemId: string;
   name: string;
@@ -36,7 +34,7 @@ export interface Session {
   amount: number;
   barAmount: number;
   totalAmount: number;
-  paymentMethod: 'cash' | 'card' | null;
+  paymentMethod: "cash" | "card" | null;
   startedAt: string; // ISO string
   endedAt: string; // ISO string
 }

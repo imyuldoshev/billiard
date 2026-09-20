@@ -1,105 +1,94 @@
-import type { Table } from '../types';
-
-import { openTableModal } from './renderTableModal';
-
-
-
+import type { Table } from "../types";
+import {
+  formatMoney,
+  getEffectiveDuration,
+  formatDuration,
+  calcCost,
+} from "../lib/calculations";
+import { state } from "../state/store";
+import { startTable, openCheckoutCallback } from "./tableActions";
 
 export function buildCard(table: Table, onRender: () => void): HTMLElement {
-  const card = document.createElement('div');
-  card.className = 'table-card' + (table.occupied ? (table.isPaused ? ' paused' : ' occupied') : '');
-  card.dataset.id = table.id.toString();
+  const card = document.createElement("div");
 
-  // Top Row: Icon + Name & Status Pill
-  const topRow = document.createElement('div');
-  topRow.className = 'card-top-row';
-  
-  const infoGroup = document.createElement('div');
-  infoGroup.className = 'table-info';
-  
-  const iconWrap = document.createElement('div');
-  iconWrap.className = 'table-icon';
-  // Minimal billiard table SVG
-  iconWrap.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/></svg>`;
-  
-  const titleGroup = document.createElement('div');
-  titleGroup.className = 'table-card-titles';
-  const name = document.createElement('div');
-  name.className = 'table-name';
-  name.textContent = `${table.id}-stol`;
-  titleGroup.appendChild(name);
-  if (table.occupied && table.customerName) {
-    const cust = document.createElement('div');
-    cust.className = 'customer-name';
-    cust.textContent = table.customerName;
-    titleGroup.appendChild(cust);
-  }
-  
-  infoGroup.appendChild(iconWrap);
-  infoGroup.appendChild(titleGroup);
-  
-  const pill = document.createElement('div');
-  pill.className = 'status-pill ' + (table.occupied ? (table.isPaused ? 'paused' : 'occupied') : 'available');
-  pill.textContent = table.occupied ? (table.isPaused ? 'Pauza' : 'Band') : "Bo'sh";
-
-  topRow.appendChild(infoGroup);
-  topRow.appendChild(pill);
-  card.appendChild(topRow);
-
-  // Metrics (Timer & Cost for occupied, or Empty Space for available)
-  const metrics = document.createElement('div');
-  metrics.className = 'card-metrics';
-  
-  if (table.occupied) {
-    const timerDisplay = document.createElement('div');
-    timerDisplay.className = 'timer-display';
-    timerDisplay.dataset.role = 'timer';
-    timerDisplay.textContent = '00:00:00';
-    
-    const costDisplay = document.createElement('div');
-    costDisplay.className = 'cost-display';
-    costDisplay.dataset.role = 'cost';
-    costDisplay.innerHTML = `Joriy narx: <b>0 so'm</b>`;
-    
-    metrics.appendChild(timerDisplay);
-    metrics.appendChild(costDisplay);
-  } else {
-    const emptyMsg = document.createElement('div');
-    emptyMsg.className = 'empty-line';
-    emptyMsg.textContent = 'Stol bo\'sh, o\'yinni boshlash mumkin.';
-    metrics.appendChild(emptyMsg);
-  }
-  card.appendChild(metrics);
-
-  // Actions
-  const actions = document.createElement('div');
-  actions.className = 'card-actions';
-  
-  if (table.occupied) {
-    const checkoutBtn = document.createElement('button');
-    checkoutBtn.className = 'btn btn-stop';
-    checkoutBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Hisobni yopish`;
-    checkoutBtn.addEventListener('click', (e) => {
+  if (!table.occupied) {
+    card.className = "table-card empty";
+    card.innerHTML = `
+      <div class="tc-status-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="tc-number">${table.id}</div>
+      <div class="tc-name">${table.id}-stol</div>
+      <button class="btn btn-primary" style="margin-top: 8px;">Boshlash</button>
+    `;
+    const startBtn = card.querySelector(".btn") as HTMLButtonElement;
+    startBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      openTableModal(table.id, onRender);
+      startTable(table.id, "", null, onRender);
     });
-    actions.appendChild(checkoutBtn);
   } else {
-    const startBtn = document.createElement('button');
-    startBtn.className = 'btn btn-start';
-    startBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Boshlash`;
-    startBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openTableModal(table.id, onRender);
-    });
-    actions.appendChild(startBtn);
-  }
-  card.appendChild(actions);
+    card.className = "table-card occupied";
+    card.innerHTML = `
+      <div class="tc-header">
+        <div class="tc-title">${table.id}-stol</div>
+      </div>
+      <div class="tc-timer" data-role="timer">00:00:00</div>
+      <div class="tc-amount" data-role="cost">0 so'm</div>
+      <div class="tc-actions">
+        <button class="btn btn-secondary btn-bar">+ Bar</button>
+        <button class="btn btn-danger btn-stop">To'xtatish</button>
+      </div>
+    `;
 
-  // Click on card itself also opens modal
-  card.addEventListener('click', () => {
-    openTableModal(table.id, onRender);
-  });
+    const timerDisplay = card.querySelector(".tc-timer") as HTMLElement;
+    const costDisplay = card.querySelector(".tc-amount") as HTMLElement;
+
+    const update = () => {
+      const durationMs = getEffectiveDuration(table);
+      const rate = table.customRate ?? state.hourlyRate;
+      timerDisplay.textContent = formatDuration(durationMs);
+
+      const gameCost = calcCost(durationMs, rate);
+      let barCost = 0;
+      if (table.barOrders && table.barOrders.length > 0) {
+        barCost = table.barOrders.reduce((sum, o) => sum + o.price * o.qty, 0);
+      }
+
+      costDisplay.innerHTML = `<b>${formatMoney(gameCost + barCost)}</b>`;
+    };
+    update();
+
+    // Use an interval dataset to clear it later if needed, but simple re-renders work too.
+    const intervalId = window.setInterval(() => {
+      if (!document.body.contains(card)) {
+        clearInterval(intervalId);
+        return;
+      }
+      update();
+    }, 1000);
+
+    const barBtn = card.querySelector(".btn-bar") as HTMLButtonElement;
+    barBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // Tab navigation to bar, pre-select table
+      document
+        .querySelector('[data-target="tab-bar"]')
+        ?.dispatchEvent(new Event("click"));
+      const select = document.getElementById(
+        "barOrderTableSelect",
+      ) as HTMLSelectElement;
+      if (select) {
+        select.value = table.id.toString();
+        select.dispatchEvent(new Event("change"));
+      }
+    });
+
+    const stopBtn = card.querySelector(".btn-stop") as HTMLButtonElement;
+    stopBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openCheckoutCallback(table.id);
+    });
+  }
 
   return card;
 }

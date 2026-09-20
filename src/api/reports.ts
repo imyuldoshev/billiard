@@ -1,9 +1,13 @@
-import { supabase } from '../lib/supabase';
-import type { DailyReport, MonthlyReport } from '../types';
+import { supabase } from "../lib/supabase";
+import type { DailyReport, MonthlyReport } from "../types";
 
 export async function saveDailyReport(report: DailyReport) {
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return;
-  const { error } = await supabase.from('daily_reports').upsert({
+  if (
+    !import.meta.env.VITE_SUPABASE_URL ||
+    !import.meta.env.VITE_SUPABASE_URL.startsWith("http")
+  )
+    return;
+  const { error } = await supabase.from("daily_reports").upsert({
     id: report.id,
     report_date: report.reportDate,
     shift_start: new Date(report.shiftStart).toISOString(),
@@ -13,24 +17,26 @@ export async function saveDailyReport(report: DailyReport) {
     bar_revenue: report.barRevenue,
     total_revenue: report.totalRevenue,
     cash_amount: report.cashAmount,
-    card_amount: report.cardAmount
+    card_amount: report.cardAmount,
   });
-  if (error) console.error('Kunlik arxivni saqlashda xatolik:', error);
+  if (error) console.error("Kunlik arxivni saqlashda xatolik:", error);
 }
 
-export async function loadDailyReports(limit: number = 30): Promise<DailyReport[]> {
+export async function loadDailyReports(
+  limit: number = 30,
+): Promise<DailyReport[]> {
   const { data, error } = await supabase
-    .from('daily_reports')
-    .select('*')
-    .order('report_date', { ascending: false })
+    .from("daily_reports")
+    .select("*")
+    .order("report_date", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('Kunlik arxivlarni yuklashda xatolik:', error);
+    console.error("Kunlik arxivlarni yuklashda xatolik:", error);
     return [];
   }
 
-  return data.map(row => ({
+  return data.map((row) => ({
     id: row.id,
     reportDate: row.report_date,
     shiftStart: row.shift_start,
@@ -40,44 +46,50 @@ export async function loadDailyReports(limit: number = 30): Promise<DailyReport[
     barRevenue: Number(row.bar_revenue),
     totalRevenue: Number(row.total_revenue),
     cashAmount: Number(row.cash_amount),
-    cardAmount: Number(row.card_amount)
+    cardAmount: Number(row.card_amount),
   }));
 }
 
 export async function saveMonthlyReport(report: MonthlyReport) {
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return;
-  const { error } = await supabase.from('monthly_reports').upsert({
+  if (
+    !import.meta.env.VITE_SUPABASE_URL ||
+    !import.meta.env.VITE_SUPABASE_URL.startsWith("http")
+  )
+    return;
+  const { error } = await supabase.from("monthly_reports").upsert({
     id: report.id,
     year: report.year,
     month: report.month,
     report_label: report.reportLabel,
     total_sessions: report.totalSessions,
     total_revenue: report.totalRevenue,
-    working_days: report.workingDays
+    working_days: report.workingDays,
   });
-  if (error) console.error('Oylik arxivni saqlashda xatolik:', error);
+  if (error) console.error("Oylik arxivni saqlashda xatolik:", error);
 }
 
-export async function loadMonthlyReports(limit: number = 12): Promise<MonthlyReport[]> {
+export async function loadMonthlyReports(
+  limit: number = 12,
+): Promise<MonthlyReport[]> {
   const { data, error } = await supabase
-    .from('monthly_reports')
-    .select('*')
-    .order('year', { ascending: false })
-    .order('month', { ascending: false })
+    .from("monthly_reports")
+    .select("*")
+    .order("year", { ascending: false })
+    .order("month", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('Oylik arxivlarni yuklashda xatolik:', error);
+    console.error("Oylik arxivlarni yuklashda xatolik:", error);
     return [];
   }
 
-  return data.map(row => ({
+  return data.map((row) => ({
     id: row.id,
     year: row.year,
     month: row.month,
     reportLabel: row.report_label,
     totalSessions: row.total_sessions,
     totalRevenue: Number(row.total_revenue),
-    workingDays: row.working_days
+    workingDays: row.working_days,
   }));
 }
