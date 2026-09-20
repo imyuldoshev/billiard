@@ -12,19 +12,3 @@ const safeKey = supabaseAnonKey || 'dummy_key';
 
 export const supabase = createClient(safeUrl, safeKey);
 
-export function subscribeToTableChanges(callback: (payload: any) => void) {
-  const channel = supabase
-    .channel('table-changes')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'table_sessions' },
-      (payload) => {
-        callback(payload);
-      }
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}

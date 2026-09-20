@@ -206,3 +206,6 @@ function stopModalTimer() {
     modalTimerInterval = null;
   }
 }
+
+document.getElementById('tableModalClose')?.addEventListener('click', closeTableModal);
+

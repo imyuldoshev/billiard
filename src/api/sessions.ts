@@ -23,7 +23,10 @@ export async function saveSessionToSupabase(session: Session) {
 }
 
 export async function loadSessionsFromSupabase(onComplete?: () => void) {
-  if (sessionRefreshInProgress) return;
+  if (sessionRefreshInProgress) {
+    if (onComplete) onComplete();
+    return;
+  }
   if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) {
     if (onComplete) onComplete();
     return;
@@ -33,7 +36,8 @@ export async function loadSessionsFromSupabase(onComplete?: () => void) {
   const { data, error } = await supabase
     .from('table_sessions')
     .select('id, table_id, customer_name, started_at, ended_at, duration_ms, amount, pause_duration_ms, bar_amount, total_amount, payment_method')
-    .order('ended_at', { ascending: false });
+    .order('ended_at', { ascending: false })
+    .limit(500);
 
   if (error) {
     console.error('Supabase tarixini yuklashda xatolik:', error);

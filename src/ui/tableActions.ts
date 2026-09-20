@@ -13,6 +13,10 @@ export function startTable(id: number, customerName: string, customRate: number 
   table.startTime = Date.now().toString();
   table.customerName = customerName || '';
   table.customRate = customRate;
+  table.isPaused = false;
+  table.pauseStartTime = null;
+  table.totalPauseDurationMs = 0;
+  table.barOrders = [];
   saveState();
   onRender();
 }

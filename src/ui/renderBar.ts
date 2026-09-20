@@ -55,6 +55,10 @@ confirmBtn?.addEventListener('click', () => {
   currentTableId = null;
 });
 
+function esc(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function renderList() {
   if (!list) return;
   const activeItems = state.barItems.filter(i => i.isActive);
@@ -73,13 +77,13 @@ function renderList() {
 
   let html = '';
   for (const cat in byCategory) {
-    html += `<div style="font-weight: 700; color: var(--gold-soft); margin: 10px 0 5px; text-transform: uppercase; font-size: 11px;">${cat}</div>`;
+    html += `<div style="font-weight: 700; color: var(--gold-soft); margin: 10px 0 5px; text-transform: uppercase; font-size: 11px;">${esc(cat)}</div>`;
     byCategory[cat].forEach(item => {
       const qty = currentDraft[item.id] || 0;
       html += `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
           <div>
-            <div style="color:var(--cream);">${item.name}</div>
+            <div style="color:var(--cream);">${esc(item.name)}</div>
             <div style="font-size: 12px;">${formatMoney(item.price)}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">

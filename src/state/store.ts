@@ -87,5 +87,5 @@ export function getMonthHistory(monthValue: string): Session[] {
 }
 
 export function computeMonthlyRevenue(monthValue: string) {
-  return getMonthHistory(monthValue).reduce((sum, h) => sum + h.amount, 0);
+  return getMonthHistory(monthValue).reduce((sum, h) => sum + h.totalAmount, 0);
 }

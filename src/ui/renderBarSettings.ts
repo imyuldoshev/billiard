@@ -42,6 +42,10 @@ addBtn?.addEventListener('click', async () => {
   addBtn.textContent = "Qo'shish";
 });
 
+function esc(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function renderList() {
   if (!list) return;
   const activeItems = state.barItems.filter(i => i.isActive);
@@ -53,7 +57,7 @@ function renderList() {
   list.innerHTML = activeItems.map(item => `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
       <div>
-        <b style="color:var(--cream);">${item.name}</b> <span style="font-size: 11px; opacity:0.7;">(${item.category})</span><br>
+        <b style="color:var(--cream);">${esc(item.name)}</b> <span style="font-size: 11px; opacity:0.7;">(${esc(item.category)})</span><br>
         ${formatMoney(item.price)}
       </div>
       <button class="btn btn-cancel" style="width: auto; padding: 6px 10px; font-size: 12px;" data-id="${item.id}">O'chirish</button>

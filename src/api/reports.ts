@@ -2,7 +2,8 @@ import { supabase } from '../lib/supabase';
 import type { DailyReport, MonthlyReport } from '../types';
 
 export async function saveDailyReport(report: DailyReport) {
-  const { error } = await supabase.from('daily_reports').insert({
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return;
+  const { error } = await supabase.from('daily_reports').upsert({
     id: report.id,
     report_date: report.reportDate,
     shift_start: new Date(report.shiftStart).toISOString(),
@@ -44,7 +45,8 @@ export async function loadDailyReports(limit: number = 30): Promise<DailyReport[
 }
 
 export async function saveMonthlyReport(report: MonthlyReport) {
-  const { error } = await supabase.from('monthly_reports').insert({
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith('http')) return;
+  const { error } = await supabase.from('monthly_reports').upsert({
     id: report.id,
     year: report.year,
     month: report.month,

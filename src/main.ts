@@ -1,10 +1,13 @@
 import { state, loadState, saveState, getTodayHistory, TABLE_COUNT } from './state/store';
-import { calcCost, formatDuration, formatMoney, formatDateTime, getEffectiveDuration } from './lib/calculations';
+import { calcCost, formatDuration, formatMoney, formatDateTime, getEffectiveDuration, getCurrentShiftStart } from './lib/calculations';
 import { loadSessionsFromSupabase, saveSessionToSupabase, deleteSessionFromSupabase } from './api/sessions';
-
+import { openBarSettings } from './ui/renderBarSettings';
+import { loadBarItems, saveBarOrders } from './api/bar';
 import { renderGrid } from './ui/renderGrid';
 import { setOpenCheckoutCallback } from './ui/tableActions';
 import { renderStats } from './ui/renderHeader';
+import { openDailyArchive, openMonthlyArchive } from './ui/renderReports';
+import { checkAndArchiveShift, checkAndArchiveMonth } from './lib/archivation';
 import type { Session } from './types';
 
 const grid = document.getElementById('tablesGrid') as HTMLElement;
@@ -21,8 +24,6 @@ const modalCustomerName = document.getElementById('modalCustomerName') as HTMLEl
 const modalDuration = document.getElementById('modalDuration') as HTMLElement;
 const modalAmount = document.getElementById('modalAmount') as HTMLElement;
 const cancelPaymentBtn = document.getElementById('cancelPaymentBtn') as HTMLButtonElement;
-import { openBarSettings } from './ui/renderBarSettings';
-import { loadBarItems, saveBarOrders } from './api/bar';
 
 const barSettingsBtn = document.getElementById('barSettingsBtn') as HTMLButtonElement;
 barSettingsBtn.addEventListener('click', openBarSettings);
@@ -254,10 +255,6 @@ function exportHistoryToCSV() {
 }
 
 exportBtn?.addEventListener('click', exportHistoryToCSV);
-
-
-
-import { openDailyArchive, openMonthlyArchive } from './ui/renderReports';
 const dailyArchiveBtn = document.getElementById('dailyArchiveBtn') as HTMLButtonElement;
 const monthlyArchiveBtn = document.getElementById('monthlyArchiveBtn') as HTMLButtonElement;
 
@@ -276,8 +273,6 @@ rateInput.addEventListener('input', () => {
     saveNoteTimeout = setTimeout(() => saveNote.classList.remove('show'), 1200);
   }
 });
-
-import { getCurrentShiftStart } from './lib/calculations';
 
 function tick() {
   const nowDateStr = new Date().toDateString();
@@ -313,8 +308,6 @@ function tick() {
     }
   });
 }
-
-import { checkAndArchiveShift, checkAndArchiveMonth } from './lib/archivation';
 
 // Init
 async function initApp() {
