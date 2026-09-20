@@ -330,7 +330,7 @@ document
       id: Date.now().toString() + Math.floor(Math.random() * 1000),
       tableId: table.id,
       customerName: custName,
-      startedAt: table.startTime,
+      startedAt: new Date(isNaN(Number(table.startTime)) ? table.startTime : Number(table.startTime)).toISOString(),
       endedAt: new Date().toISOString(),
       durationMs,
       pauseDurationMs: table.totalPauseDurationMs,

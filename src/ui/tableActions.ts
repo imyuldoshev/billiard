@@ -15,7 +15,7 @@ export function startTable(
   const table = state.tables.find((t) => t.id === id);
   if (!table || table.occupied) return;
   table.occupied = true;
-  table.startTime = Date.now().toString();
+  table.startTime = new Date().toISOString();
   table.customerName = customerName || "";
   table.customRate = customRate;
   table.isPaused = false;
