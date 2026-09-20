@@ -641,3 +641,44 @@ body {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
+
+.table-chip-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.table-chip-list::-webkit-scrollbar {
+  display: none;
+}
+.table-chip {
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-soft);
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.table-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  text-align: center;
+  gap: 12px;
+}
+.empty-state svg {
+  color: var(--border-strong);
+}

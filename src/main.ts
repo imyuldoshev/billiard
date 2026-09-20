@@ -169,15 +169,13 @@ function renderHistory() {
     );
     historyWrap.innerHTML = sorted
       .map((h) => {
-        const pm =
-          h.paymentMethod === "card"
-            ? "💳"
-            : h.paymentMethod === "cash"
-              ? "💵"
-              : "";
-        const cust = h.customerName
-          ? ` &middot; ${escapeHtml(h.customerName)}`
-          : "";
+        const cardSvg = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#60a5fa" stroke-width="2" style="vertical-align:-3px; margin-left:6px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`;
+        const cashSvg = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#34d399" stroke-width="2" style="vertical-align:-3px; margin-left:6px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>`;
+        const userSvg = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        const trashSvg = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`;
+
+        const pm = h.paymentMethod === "card" ? cardSvg : h.paymentMethod === "cash" ? cashSvg : "";
+        const cust = h.customerName ? `<div class="hist-summary" style="margin-top:8px; color:var(--text-dim); font-size:13px; display:flex; align-items:center;">${userSvg}${escapeHtml(h.customerName)}</div>` : "";
         const timeStr = new Date(h.endedAt).toLocaleTimeString("uz-UZ", {
           hour: "2-digit",
           minute: "2-digit",
@@ -188,11 +186,13 @@ function renderHistory() {
             <div class="hist-title">${h.tableId}-stol &middot; ${timeStr}</div>
             <div class="hist-amount">${formatMoney(h.totalAmount)} ${pm}</div>
           </div>
-          <div class="hist-bot">
-            <span>Davomiylik: ${formatDuration(h.durationMs)}</span>
-            <button class="delete-history-btn" data-id="${h.id}" style="background:none;border:none;color:var(--text-dim);font-size:16px;">🗑</button>
+          <div class="hist-bot" style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div style="margin-bottom:4px;">Davomiylik: ${formatDuration(h.durationMs)}</div>
+              ${cust}
+            </div>
+            <button class="delete-history-btn" data-id="${h.id}" style="background:rgba(239, 68, 68, 0.1);border:none;color:var(--red-occ-soft);padding:8px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">${trashSvg}</button>
           </div>
-          ${cust ? `<div class="hist-summary">${cust}</div>` : ""}
         </div>
       `;
       })
@@ -383,20 +383,30 @@ document
 // Bar Logic
 let currentBarDraft: Record<string, number> = {};
 
+let selectedTableForBar: number | null = null;
+
 function updateBarSellView() {
-  const select = document.getElementById(
-    "barOrderTableSelect",
-  ) as HTMLSelectElement;
-  select.innerHTML = "";
+  const container = document.getElementById("barOrderTableSelect") as HTMLElement;
+  container.innerHTML = "";
   const occupiedTables = state.tables.filter((t) => t.occupied);
+  
   if (occupiedTables.length === 0) {
-    select.innerHTML = `<option disabled selected>Band stollar yo'q</option>`;
+    container.innerHTML = `<div class="empty-state" style="padding: 10px;">Barcha stollar bo'sh</div>`;
+    selectedTableForBar = null;
   } else {
+    if (!selectedTableForBar || !occupiedTables.find(t => t.id === selectedTableForBar)) {
+      selectedTableForBar = occupiedTables[0].id;
+    }
     occupiedTables.forEach((t) => {
-      const opt = document.createElement("option");
-      opt.value = t.id.toString();
-      opt.textContent = `${t.id}-stol`;
-      select.appendChild(opt);
+      const chip = document.createElement("div");
+      chip.className = "table-chip";
+      if (t.id === selectedTableForBar) chip.classList.add("active");
+      chip.textContent = `${t.id}-stol`;
+      chip.addEventListener("click", () => {
+        selectedTableForBar = t.id;
+        updateBarSellView();
+      });
+      container.appendChild(chip);
     });
   }
 
@@ -406,15 +416,26 @@ function updateBarSellView() {
 
 function renderBarSellList() {
   const list = document.getElementById("barOrderItems") as HTMLElement;
+  const stickyPanel = document.getElementById("barStickyPanel") as HTMLElement;
   const activeItems = state.barItems.filter((i) => i.isActive);
 
   if (activeItems.length === 0) {
-    list.innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-dim);">Mahsulotlar yo'q</div>`;
-    (
-      document.getElementById("barOrderTotalAmount") as HTMLElement
-    ).textContent = "0 so'm";
+    list.innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+          <line x1="6" y1="1" x2="6" y2="4"/>
+          <line x1="10" y1="1" x2="10" y2="4"/>
+          <line x1="14" y1="1" x2="14" y2="4"/>
+        </svg>
+        <div>Mahsulotlar yo'q. "Menyu" bo'limida qo'shing.</div>
+      </div>`;
+    (document.getElementById("barOrderTotalAmount") as HTMLElement).textContent = "0 so'm";
+    if (stickyPanel) stickyPanel.style.display = 'none';
     return;
   }
+  
+  if (stickyPanel) stickyPanel.style.display = 'block';
 
   list.innerHTML = activeItems
     .map((item) => {
@@ -453,40 +474,39 @@ function renderBarSellList() {
 }
 
 document.getElementById("confirmBarOrderBtn")?.addEventListener("click", () => {
-  const select = document.getElementById(
-    "barOrderTableSelect",
-  ) as HTMLSelectElement;
-  if (!select || !select.value) return;
-  const tid = parseInt(select.value);
+  if (selectedTableForBar === null) return;
+  const tid = selectedTableForBar;
   const table = state.tables.find((t) => t.id === tid);
   if (!table) return;
 
   const activeItems = state.barItems.filter((i) => i.isActive);
-  let added = false;
+  let hasOrder = false;
   for (const itemId in currentBarDraft) {
     const qty = currentBarDraft[itemId];
     if (qty > 0) {
+      hasOrder = true;
       const item = activeItems.find((i) => i.id === itemId);
       if (item) {
         const existing = table.barOrders.find((o) => o.itemId === itemId);
-        if (existing) existing.qty += qty;
-        else
+        if (existing) {
+          existing.qty += qty;
+        } else {
           table.barOrders.push({
             itemId,
             name: item.name,
             price: item.price,
             qty,
           });
-        added = true;
+        }
       }
     }
   }
 
-  if (added) {
+  if (hasOrder) {
     saveState();
-    onRender();
     showDialog({ type: "alert", message: "Sotildi!" });
     updateBarSellView();
+    onRender();
   }
 });
 

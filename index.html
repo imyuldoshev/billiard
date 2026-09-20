@@ -55,11 +55,11 @@
           <div id="bar-sell-view" class="view-pane active">
             <div class="field-group">
               <label>Qaysi stolga:</label>
-              <select id="barOrderTableSelect" class="input"></select>
+              <div id="barOrderTableSelect" class="table-chip-list"></div>
             </div>
             <div id="barOrderItems" class="bar-items-list"></div>
 
-            <div class="sticky-bottom-bar">
+            <div class="sticky-bottom-bar" id="barStickyPanel">
               <div class="row">
                 <span>Jami:</span><b id="barOrderTotalAmount">0 so'm</b>
               </div>
@@ -69,7 +69,7 @@
             </div>
           </div>
 
-          <div id="bar-menu-view" class="view-pane" style="display: none">
+          <div id="bar-menu-view" class="view-pane">
             <div class="menu-add-form">
               <input
                 type="text"
@@ -101,15 +101,14 @@
 
         <!-- TARIX TAB -->
         <section id="tab-history" class="tab-pane">
-          <div class="segment-control tab-segment">
-            <button class="seg-btn active" data-view="hist-today-view">
-              Bugun
-            </button>
-            <button class="seg-btn" data-view="hist-month-view">Oy</button>
-          </div>
-
-          <div class="history-actions">
-            <button class="btn btn-outline btn-sm" id="exportBtn">
+          <div class="history-top-bar" style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center;">
+            <div class="segment-control tab-segment" style="flex: 1; margin-bottom: 0;">
+              <button class="seg-btn active" data-view="hist-today-view">
+                Bugun
+              </button>
+              <button class="seg-btn" data-view="hist-month-view">Oy</button>
+            </div>
+            <button class="btn btn-outline btn-sm" id="exportBtn" style="width: auto; height: 40px; border-color: var(--border-soft);">
               <svg
                 viewBox="0 0 24 24"
                 width="16"
@@ -122,7 +121,6 @@
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              CSV Eksport
             </button>
           </div>
 
