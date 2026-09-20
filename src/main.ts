@@ -261,16 +261,58 @@ function renderHistory() {
   }
 
   // Render Month
-  loadMonthlyReports().then((reports) => {
-    if (reports.length === 0) {
-      monthlyArchiveList.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-dim);">Arxivlar topilmadi.</div>`;
-    } else {
-      monthlyArchiveList.innerHTML = reports
-        .map(
-          (r) => `
+  Promise.all([loadMonthlyReports(), loadDailyReports(31)]).then(([reports, dailyReports]) => {
+    let html = "";
+    
+    // Calculate current month
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    
+    let currentMonthSessions = 0;
+    let currentMonthRevenue = 0;
+    let workingDays = 0;
+    
+    const currentMonthDaily = dailyReports.filter(r => {
+      const d = new Date(r.shiftStart);
+      return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
+    });
+    
+    currentMonthDaily.forEach(r => {
+      currentMonthSessions += r.totalSessions;
+      currentMonthRevenue += r.totalRevenue;
+      workingDays++;
+    });
+    
+    const today = getTodayHistory();
+    if (today.length > 0) {
+      workingDays++;
+      currentMonthSessions += today.length;
+      today.forEach(s => {
+        currentMonthRevenue += s.totalAmount;
+      });
+    }
+
+    if (currentMonthSessions > 0) {
+       html += `
+        <div class="history-item" style="border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);">
+          <div class="hist-top">
+            <div class="hist-title" style="color:var(--accent);">Joriy oy (${currentYear}-${String(currentMonth).padStart(2, "0")})</div>
+            <div class="hist-amount" style="color:var(--green-avail);">${formatMoney(currentMonthRevenue)}</div>
+          </div>
+          <div class="hist-bot">
+            <span>O'yinlar: ${currentMonthSessions} ta</span>
+            <span>${workingDays} ish kuni</span>
+          </div>
+        </div>
+      `;
+    }
+
+    if (reports.length > 0) {
+      html += reports.map(r => `
         <div class="history-item">
           <div class="hist-top">
-            <div class="hist-title" style="color:var(--gold-soft);">${r.reportLabel} (${r.year}-${String(r.month).padStart(2, "0")})</div>
+            <div class="hist-title" style="color:var(--gold-soft);">${r.reportLabel}</div>
             <div class="hist-amount" style="color:var(--green-avail);">${formatMoney(r.totalRevenue)}</div>
           </div>
           <div class="hist-bot">
@@ -278,9 +320,21 @@ function renderHistory() {
             <span>${r.workingDays} ish kuni</span>
           </div>
         </div>
-      `,
-        )
-        .join("");
+      `).join("");
+    }
+
+    if (!html) {
+      monthlyArchiveList.innerHTML = `<div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <div>Arxivlar topilmadi.</div>
+      </div>`;
+    } else {
+      monthlyArchiveList.innerHTML = html;
     }
   });
 }
