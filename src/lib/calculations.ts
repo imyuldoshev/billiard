@@ -21,7 +21,8 @@ export function formatDateTime(ms: number): string {
 }
 
 export function calcCost(ms: number, rate: number): number {
-  return (ms / 3600000) * rate;
+  const rawCost = (ms / 3600000) * rate;
+  return Math.floor(rawCost / 1000) * 1000;
 }
 
 import type { Table } from "../types";
