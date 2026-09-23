@@ -28,6 +28,29 @@ export const state: AppState & {
   dailyRevenuePeriodStartedAt: null,
 };
 
+export function addTable(): void {
+  const maxId = state.tables.reduce((max, t) => Math.max(max, t.id), 0);
+  state.tables.push({
+    id: maxId + 1,
+    occupied: false,
+    startTime: null,
+    customerName: null,
+    customRate: null,
+    isPaused: false,
+    pauseStartTime: null,
+    totalPauseDurationMs: 0,
+    barOrders: [],
+  });
+}
+
+export function removeTable(id: number): boolean {
+  const idx = state.tables.findIndex((t) => t.id === id);
+  if (idx === -1) return false;
+  if (state.tables[idx].occupied) return false; // Band stolni o'chirib bo'lmaydi
+  state.tables.splice(idx, 1);
+  return true;
+}
+
 export function loadState(): void {
   try {
     const raw = localStorage.getItem(getStorageKey());

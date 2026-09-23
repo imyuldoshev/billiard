@@ -206,6 +206,61 @@ body {
   margin-top: 16px;
 }
 
+/* Add Table Card */
+.table-card-add {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: transparent;
+  color: var(--text-dim);
+  transition: all 0.2s;
+}
+.table-card-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(59, 130, 246, 0.06);
+}
+.tc-add-icon {
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
+.table-card-add:hover .tc-add-icon {
+  opacity: 1;
+}
+.tc-add-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Delete Table Button */
+.btn-table-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.table-card:hover .btn-table-delete {
+  opacity: 1;
+}
+.btn-table-delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--red-occ);
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
