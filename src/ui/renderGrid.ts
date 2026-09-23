@@ -1,6 +1,6 @@
 import { state, addTable, removeTable, saveState } from "../state/store";
 import { buildCard } from "./renderCard";
-import { showDialog } from "./dialog";
+import { showPinConfirm } from "./dialog";
 
 export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
   gridEl.innerHTML = "";
@@ -22,10 +22,9 @@ export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
         deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
         deleteBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          showDialog({
-            type: "confirm",
-            message: `${t.id}-stolni o'chirishni tasdiqlaysizmi?`,
-            onConfirm: () => {
+          showPinConfirm({
+            message: `${t.id}-stolni o'chirmoqchisiz. Tasdiqlash uchun PIN kodni kiriting.`,
+            onSuccess: () => {
               const ok = removeTable(t.id);
               if (ok) {
                 saveState();
