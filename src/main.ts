@@ -110,6 +110,15 @@ loginNextBtn?.addEventListener("click", async () => {
     loginPinText.textContent = "PIN kodni kiriting:";
     loginSubmitBtn.textContent = "Kirish";
   }
+  setTimeout(() => loginPin.focus(), 100);
+});
+
+// Login — Enter bilan o'tish
+loginPhone?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") loginNextBtn?.click();
+});
+loginPin?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") loginSubmitBtn?.click();
 });
 
 loginBackBtn?.addEventListener("click", () => {
@@ -587,8 +596,12 @@ if (customTotalInput) {
       (e.target as HTMLInputElement).value = "";
     }
   });
+  // Enter — To'lovni tasdiqlash
+  customTotalInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter")
+      (document.getElementById("sheetConfirmBtn") as HTMLButtonElement)?.click();
+  });
 }
-
 
 document
   .getElementById("sheetCancelBtn")
@@ -849,6 +862,15 @@ document.getElementById("addBarItemBtn")?.addEventListener("click", () => {
   }
 });
 
+// Bar menyu — Enter bilan qo'shish
+["barItemName", "barItemPrice"].forEach((id) => {
+  document.getElementById(id)?.addEventListener("keydown", (e) => {
+    if ((e as KeyboardEvent).key === "Enter")
+      (document.getElementById("addBarItemBtn") as HTMLButtonElement)?.click();
+  });
+});
+
+
 // Settings
 document.getElementById("saveRateBtn")?.addEventListener("click", () => {
   const val = parseInt(hourlyRateInput.value);
@@ -865,6 +887,11 @@ document.getElementById("saveRateBtn")?.addEventListener("click", () => {
       },
     });
   }
+});
+
+// Sozlamalar — Enter bilan saqlash
+hourlyRateInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") (document.getElementById("saveRateBtn") as HTMLButtonElement)?.click();
 });
 
 const dailyArchiveOverlay = document.getElementById(

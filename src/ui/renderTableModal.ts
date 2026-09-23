@@ -81,6 +81,14 @@ export function openTableModal(tableId: number, onRender: () => void) {
     content.appendChild(rateToggle);
     content.appendChild(rateInputField);
     content.appendChild(startBtn);
+
+    // Enter — Boshlash
+    [nameInput, rateInputField].forEach((inp) => {
+      inp.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") startBtn.click();
+      });
+    });
+    setTimeout(() => nameInput.focus(), 100);
   } else {
     // Band stol modali
     const title = document.createElement("h3");
