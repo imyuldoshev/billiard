@@ -1,6 +1,6 @@
 import { state, addTable, removeTable, saveState } from "../state/store";
 import { buildCard } from "./renderCard";
-import { showPinConfirm } from "./dialog";
+import { showDialog, showPinConfirm } from "./dialog";
 
 export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
   gridEl.innerHTML = "";
@@ -56,9 +56,16 @@ export function renderGrid(gridEl: HTMLElement, onRenderStats: () => void) {
     <div class="tc-add-label">Stol qo'shish</div>
   `;
   addCard.addEventListener("click", () => {
-    addTable();
-    saveState();
-    onRender();
+    showDialog({
+      type: "confirm",
+      message: "Yangi stol qo'shmoqchisizmi?",
+      confirmText: "Qo'shish",
+      onConfirm: () => {
+        addTable();
+        saveState();
+        onRender();
+      },
+    });
   });
   gridEl.appendChild(addCard);
 }
