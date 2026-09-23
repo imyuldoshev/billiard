@@ -286,8 +286,30 @@ function onRender() {
 }
 
 // Start
+function updateOnlineStatus() {
+  const dot = document.querySelector(".status-dot") as HTMLElement;
+  if (!dot) return;
+  if (navigator.onLine) {
+    dot.style.backgroundColor = "";
+    dot.style.boxShadow = "";
+    dot.title = "Online";
+  } else {
+    dot.style.backgroundColor = "#f59e0b";
+    dot.style.boxShadow = "0 0 8px #f59e0b";
+    dot.title = "Oflayn rejim";
+  }
+}
+
+window.addEventListener("online", () => {
+  updateOnlineStatus();
+  // Online bo'lganda Supabasega sync qilish
+  loadSessionsFromSupabase(onRender);
+});
+window.addEventListener("offline", updateOnlineStatus);
+
 async function initApp() {
   loadState();
+  updateOnlineStatus();
 
   if (state.tables.length === 0) {
     state.tables = Array.from({ length: TABLE_COUNT }, (_, i) => ({

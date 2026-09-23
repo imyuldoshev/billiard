@@ -1,7 +1,10 @@
 import { supabase } from "../lib/supabase";
 
 export async function checkPhoneExists(phone: string): Promise<boolean> {
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) return false;
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) {
+    // Supabase sozlanmagan — lokal tekshiruv
+    return !!localStorage.getItem("offline_pin_" + phone);
+  }
   
   try {
     const { data, error } = await supabase
@@ -10,10 +13,13 @@ export async function checkPhoneExists(phone: string): Promise<boolean> {
       .eq("phone", phone)
       .maybeSingle();
 
-    if (error) return false;
+    if (error) {
+      // Tarmoq xatosi — localdan tekshiramiz
+      return !!localStorage.getItem("offline_pin_" + phone);
+    }
     return !!data;
   } catch (e) {
-    // Oflayn bo'lsa va bu nomer telefonda oldin kirilgan bo'lsa, uni bor deb hisoblaymiz
+    // Oflayn — lokal xotiradan tekshiramiz
     return !!localStorage.getItem("offline_pin_" + phone);
   }
 }
