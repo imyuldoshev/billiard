@@ -531,8 +531,7 @@ setOpenCheckoutCallback((id: number) => {
 
   (document.getElementById("sheetTotalAmount") as HTMLElement).textContent =
     formatMoney(totalAmount);
-  (document.getElementById("sheetCustomerName") as HTMLInputElement).value =
-    table.customerName || "";
+  (document.getElementById("sheetCustomTotalAmount") as HTMLInputElement).value = "";
 
   pendingPaymentMethod = "cash";
   document.querySelectorAll("#paymentMethodSeg .seg-btn").forEach((btn) => {
@@ -555,6 +554,19 @@ document.querySelectorAll("#paymentMethodSeg .seg-btn").forEach((btn) => {
     pendingPaymentMethod = t.dataset.type as "cash" | "card";
   });
 });
+
+const customTotalInput = document.getElementById("sheetCustomTotalAmount") as HTMLInputElement;
+if (customTotalInput) {
+  customTotalInput.addEventListener("input", (e) => {
+    let val = (e.target as HTMLInputElement).value.replace(/\D/g, "");
+    if (val) {
+      (e.target as HTMLInputElement).value = parseInt(val, 10).toLocaleString("ru-RU").replace(/\s/g, " ");
+    } else {
+      (e.target as HTMLInputElement).value = "";
+    }
+  });
+}
+
 
 document
   .getElementById("sheetCancelBtn")
@@ -583,9 +595,13 @@ document
       barAmount = table.barOrders.reduce((sum, o) => sum + o.price * o.qty, 0);
     }
 
-    const custName = (
-      document.getElementById("sheetCustomerName") as HTMLInputElement
-    ).value.trim();
+    const customAmountStr = (
+      document.getElementById("sheetCustomTotalAmount") as HTMLInputElement
+    ).value.replace(/\s/g, "");
+    const customAmountVal = customAmountStr ? parseInt(customAmountStr, 10) : NaN;
+    const finalTotalAmount = !isNaN(customAmountVal) ? customAmountVal : (gameAmount + barAmount);
+
+    const custName = table.customerName || "";
 
     const session = {
       id: Date.now().toString() + Math.floor(Math.random() * 1000),
@@ -597,7 +613,7 @@ document
       pauseDurationMs: table.totalPauseDurationMs,
       amount: gameAmount,
       barAmount,
-      totalAmount: gameAmount + barAmount,
+      totalAmount: finalTotalAmount,
       paymentMethod: pendingPaymentMethod,
       barOrders: JSON.parse(JSON.stringify(table.barOrders)),
     };
