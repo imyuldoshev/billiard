@@ -345,7 +345,7 @@
       </div>
 
                   <div class="bottom-sheet-overlay" id="calendarDialogOverlay">
-        <div class="bottom-sheet" style="max-height: 90vh; overflow-y: auto;">
+        <div class="bottom-sheet" style="max-height: 90vh; overflow-y: auto; padding-left: 12px; padding-right: 12px;">
           <div class="sheet-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: none;">
             <button id="calendarPrevBtn" style="background: transparent; border: none; color: var(--text-color); cursor: pointer; padding: 12px;">
               <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -356,10 +356,10 @@
             </button>
           </div>
           <div class="sheet-content" style="padding-top: 8px;">
-            <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; color: var(--text-dim); margin-bottom: 16px; font-weight: 500;">
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 14px; color: var(--text-dim); margin-bottom: 12px; font-weight: 600;">
               <div>Du</div><div>Se</div><div>Ch</div><div>Pa</div><div>Ju</div><div>Sh</div><div>Ya</div>
             </div>
-            <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
+            <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
               <!-- JS rendered days -->
             </div>
           </div>
