@@ -105,3 +105,51 @@ export async function deleteSessionFromSupabase(id: string) {
   }
   return true;
 }
+
+export async function loadSessionsByDate(dateStr: string): Promise<Session[]> {
+  const userId = localStorage.getItem("currentUser");
+  if (!userId) return [];
+  if (
+    !import.meta.env.VITE_SUPABASE_URL ||
+    !import.meta.env.VITE_SUPABASE_URL.startsWith("http")
+  ) {
+    // Fallback to local state history
+    return state.history.filter(s => {
+      const d = new Date(s.endedAt);
+      const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      return ds === dateStr;
+    });
+  }
+
+  const startOfDay = new Date(dateStr + "T00:00:00").toISOString();
+  const endOfDay = new Date(dateStr + "T23:59:59.999").toISOString();
+
+  const { data, error } = await supabase
+    .from("table_sessions")
+    .select(
+      "id, table_id, customer_name, started_at, ended_at, duration_ms, amount, pause_duration_ms, bar_amount, total_amount, payment_method"
+    )
+    .eq("user_id", userId)
+    .gte("ended_at", startOfDay)
+    .lte("ended_at", endOfDay)
+    .order("ended_at", { ascending: false });
+
+  if (error) {
+    console.error("Sanaga oid seanslarni yuklashda xatolik:", error);
+    return [];
+  }
+
+  return data.map((session: any) => ({
+    id: session.id,
+    tableId: session.table_id,
+    customerName: session.customer_name || null,
+    startedAt: session.started_at,
+    endedAt: session.ended_at,
+    durationMs: Number(session.duration_ms),
+    amount: Number(session.amount),
+    pauseDurationMs: Number(session.pause_duration_ms),
+    barAmount: Number(session.bar_amount),
+    totalAmount: Number(session.total_amount || session.amount),
+    paymentMethod: session.payment_method,
+  }));
+}

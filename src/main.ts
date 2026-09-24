@@ -15,6 +15,7 @@ import {
   loadSessionsFromSupabase,
   saveSessionToSupabase,
   deleteSessionFromSupabase,
+  loadSessionsByDate,
 } from "./api/sessions";
 import { loadBarItems } from "./api/bar";
 import { loadDailyReports, loadMonthlyReports } from "./api/reports";
@@ -182,6 +183,23 @@ const historyCountLabel = document.getElementById(
 const monthlyArchiveList = document.getElementById(
   "monthlyArchiveList",
 ) as HTMLElement;
+
+// Daily Report DOM
+const dailyReportDate = document.getElementById("dailyReportDate") as HTMLInputElement;
+const dailyReportWrap = document.getElementById("dailyReportWrap") as HTMLElement;
+const dailyReportCountLabel = document.getElementById("dailyReportCountLabel") as HTMLElement;
+const dailyReportMonthLabel = document.getElementById("dailyReportMonthLabel") as HTMLElement;
+const dailyReportMonthTotal = document.getElementById("dailyReportMonthTotal") as HTMLElement;
+
+// Receipt Dialog DOM
+const receiptDialogOverlay = document.getElementById("receiptDialogOverlay") as HTMLElement;
+const receiptContent = document.getElementById("receiptContent") as HTMLElement;
+const receiptTitle = document.getElementById("receiptTitle") as HTMLElement;
+const receiptCloseBtn = document.getElementById("receiptCloseBtn") as HTMLButtonElement;
+receiptCloseBtn?.addEventListener("click", () => {
+  receiptDialogOverlay.classList.remove("show");
+});
+
 const hourlyRateInput = document.getElementById(
   "hourlyRate",
 ) as HTMLInputElement;
@@ -369,8 +387,141 @@ async function initApp() {
   }
 }
 
+
+let activeDailySessions: any[] = [];
+
+function openReceipt(session: any) {
+  const cardSvg = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#60a5fa" stroke-width="2" style="vertical-align:-3px; margin-right:6px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+  const cashSvg = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#34d399" stroke-width="2" style="vertical-align:-3px; margin-right:6px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>';
+  
+  receiptTitle.textContent = `${session.tableId}-stol cheki`;
+  const pm = session.paymentMethod === "card" ? `${cardSvg} Karta` : `${cashSvg} Naqd`;
+  
+  const startStr = new Date(session.startedAt).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+  const endStr = new Date(session.endedAt).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+
+  receiptContent.innerHTML = `
+    <div style="font-size: 15px; color: var(--text-dim); margin-bottom: 12px; text-align: center;">
+      Sana: ${new Date(session.endedAt).toLocaleDateString("uz-UZ")}
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; margin-bottom: 8px;">
+      <span>Boshlandi:</span> <b>${startStr}</b>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; margin-bottom: 8px;">
+      <span>Tugadi:</span> <b>${endStr}</b>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; margin-bottom: 8px;">
+      <span>O'ynalgan vaqt:</span> <b>${formatDuration(session.durationMs)}</b>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; margin-bottom: 8px;">
+      <span>O'yin summasi:</span> <b>${formatMoney(session.amount)}</b>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; margin-bottom: 8px;">
+      <span>Bar summasi:</span> <b>${formatMoney(session.barAmount)}</b>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; margin-bottom: 16px;">
+      <span>To'lov usuli:</span> <b>${pm}</b>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: var(--green-avail);">
+      <span>Jami to'lov:</span> <span>${formatMoney(session.totalAmount)}</span>
+    </div>
+    ${session.customerName ? `<div style="margin-top: 16px; font-size: 14px; color: var(--text-dim); text-align: center;">Mijoz: ${escapeHtml(session.customerName)}</div>` : ''}
+  `;
+  receiptDialogOverlay.classList.add("show");
+}
+
+async function renderDailyHistory(dateStr: string) {
+  dailyReportWrap.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-dim);">Yuklanmoqda...</div>`;
+  
+  const [sessions, dailyReports] = await Promise.all([
+    loadSessionsByDate(dateStr),
+    loadDailyReports(31)
+  ]);
+  
+  activeDailySessions = sessions;
+  dailyReportCountLabel.textContent = `${sessions.length} ta o'yin`;
+  
+  const selectedDate = new Date(dateStr);
+  const selYear = selectedDate.getFullYear();
+  const selMonth = selectedDate.getMonth() + 1;
+  const selDay = selectedDate.getDate();
+  
+  let monthTotal = 0;
+  
+  dailyReports.forEach(r => {
+    const d = new Date(r.shiftStart);
+    if (d.getFullYear() === selYear && d.getMonth() + 1 === selMonth && d.getDate() <= selDay) {
+      monthTotal += r.totalRevenue;
+    }
+  });
+  
+  const todayDateStr = new Date().toISOString().split("T")[0];
+  if (dateStr === todayDateStr) {
+    const today = getTodayHistory();
+    monthTotal += today.reduce((sum, h) => sum + h.totalAmount, 0);
+  }
+  
+  dailyReportMonthLabel.textContent = `${selDay}-${String(selMonth).padStart(2, "0")}`;
+  dailyReportMonthTotal.textContent = formatMoney(monthTotal);
+
+  if (sessions.length === 0) {
+    dailyReportWrap.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-dim);">Ushbu sanada o'yinlar yo'q</div>`;
+    return;
+  }
+  
+  dailyReportWrap.innerHTML = sessions.map((h, i) => {
+    const cardSvg = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#60a5fa" stroke-width="2" style="vertical-align:-3px; margin-left:6px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+    const cashSvg = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#34d399" stroke-width="2" style="vertical-align:-3px; margin-left:6px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>';
+    const userSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
+    const pm = h.paymentMethod === "card" ? cardSvg : h.paymentMethod === "cash" ? cashSvg : "";
+    const cust = h.customerName ? `<div class="hist-summary" style="margin-top:8px; color:var(--text-dim); font-size:13px; display:flex; align-items:center;">${userSvg}${escapeHtml(h.customerName)}</div>` : "";
+    const timeStr = new Date(h.endedAt).toLocaleTimeString("uz-UZ", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `
+    <div class="history-item daily-hist-item" data-index="${i}" style="cursor: pointer;">
+      <div class="hist-top">
+        <div class="hist-title">${h.tableId}-stol &middot; ${timeStr}</div>
+        <div class="hist-amount">${formatMoney(h.totalAmount)} ${pm}</div>
+      </div>
+      <div class="hist-bot" style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <div>
+          <div style="margin-bottom:4px;">Davomiylik: ${formatDuration(h.durationMs)}</div>
+          ${cust}
+        </div>
+      </div>
+    </div>
+  `;
+  }).join("");
+
+  dailyReportWrap.querySelectorAll(".daily-hist-item").forEach(item => {
+    item.addEventListener("click", (e) => {
+      const idx = parseInt((e.currentTarget as HTMLElement).dataset.index || "0", 10);
+      const session = activeDailySessions[idx];
+      if (session) {
+        openReceipt(session);
+      }
+    });
+  });
+}
+
+dailyReportDate.addEventListener("change", (e) => {
+  renderDailyHistory((e.target as HTMLInputElement).value);
+});
+
 // History
+
 function renderHistory() {
+  if (!dailyReportDate.value) {
+    const today = new Date().toISOString().split("T")[0];
+    dailyReportDate.value = today;
+    renderDailyHistory(today);
+  } else {
+    renderDailyHistory(dailyReportDate.value);
+  }
+
   const todayHistory = getTodayHistory();
   historyCountLabel.textContent = `${todayHistory.length} ta o'yin`;
 

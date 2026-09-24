@@ -130,6 +130,7 @@
               <button class="seg-btn active" data-view="hist-today-view">
                 Bugun
               </button>
+              <button class="seg-btn" data-view="hist-daily-view">Kun</button>
               <button class="seg-btn" data-view="hist-month-view">Oy</button>
             </div>
             <button class="btn btn-outline btn-sm" id="exportBtn" style="width: auto; height: 40px; border-color: var(--border-soft);">
@@ -155,6 +156,20 @@
               >
             </div>
             <div id="historyWrap" class="history-wrap"></div>
+          </div>
+
+                    <div id="hist-daily-view" class="view-pane">
+            <div style="margin-bottom: 16px; background: var(--surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-soft);">
+              <div style="font-size: 14px; color: var(--text-dim); margin-bottom: 4px;">Shu oydagi jami (<span id="dailyReportMonthLabel"></span> holatiga):</div>
+              <div style="font-size: 24px; font-weight: 700; color: var(--green-avail);" id="dailyReportMonthTotal">0 so'm</div>
+            </div>
+            <div class="field-group">
+              <input type="date" id="dailyReportDate" class="input" style="width: 100%;" />
+            </div>
+            <div class="history-summary">
+              <span id="dailyReportCountLabel" class="history-count">0 ta o'yin</span>
+            </div>
+            <div id="dailyReportWrap" class="history-wrap"></div>
           </div>
 
           <div id="hist-month-view" class="view-pane">
@@ -320,6 +335,34 @@
         </div>
       </div>
 
+            <div class="modal-overlay" id="receiptDialogOverlay">
+        <div class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
+          <div class="sheet-header">
+            <h3 id="receiptTitle">Chek</h3>
+          </div>
+          <div class="sheet-content" id="receiptContent">
+            <!-- content injected by JS -->
+          </div>
+          <div style="padding: 16px;">
+            <button class="btn btn-secondary" id="receiptCloseBtn" style="width: 100%;">Yopish</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-overlay" id="receiptDialogOverlay">
+        <div class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
+          <div class="sheet-header">
+            <h3 id="receiptTitle">Chek</h3>
+          </div>
+          <div class="sheet-content" id="receiptContent" style="padding-top: 16px; padding-bottom: 16px;">
+            <!-- content injected by JS -->
+          </div>
+          <div style="padding: 16px; padding-top: 0;">
+            <button class="btn btn-secondary" id="receiptCloseBtn" style="width: 100%;">Yopish</button>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-overlay" id="customDialogOverlay">
         <div class="modal-box report-box">
           <h3 id="customDialogMessage">Xabar</h3>
@@ -351,3 +394,4 @@
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
+
