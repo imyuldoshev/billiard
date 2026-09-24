@@ -185,7 +185,18 @@ const monthlyArchiveList = document.getElementById(
 ) as HTMLElement;
 
 // Daily Report DOM
-const dailyReportDate = document.getElementById("dailyReportDate") as HTMLInputElement;
+// Calendar variables
+const dailyReportDateTrigger = document.getElementById("dailyReportDateTrigger") as HTMLElement;
+const dailyReportDateDisplay = document.getElementById("dailyReportDateDisplay") as HTMLElement;
+const calendarDialogOverlay = document.getElementById("calendarDialogOverlay") as HTMLElement;
+const calendarPrevBtn = document.getElementById("calendarPrevBtn") as HTMLButtonElement;
+const calendarNextBtn = document.getElementById("calendarNextBtn") as HTMLButtonElement;
+const calendarMonthYear = document.getElementById("calendarMonthYear") as HTMLElement;
+const calendarGrid = document.getElementById("calendarGrid") as HTMLElement;
+const calendarCloseBtn = document.getElementById("calendarCloseBtn") as HTMLButtonElement;
+
+let selectedDailyDateStr = "";
+let currentCalendarDate = new Date();
 const dailyReportWrap = document.getElementById("dailyReportWrap") as HTMLElement;
 const dailyReportCountLabel = document.getElementById("dailyReportCountLabel") as HTMLElement;
 const dailyReportMonthLabel = document.getElementById("dailyReportMonthLabel") as HTMLElement;
@@ -507,19 +518,103 @@ async function renderDailyHistory(dateStr: string) {
   });
 }
 
-dailyReportDate.addEventListener("change", (e) => {
-  renderDailyHistory((e.target as HTMLInputElement).value);
+// Custom Calendar Logic
+const monthNames = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
+
+function renderCalendar() {
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // Convert JS Sunday (0) to Monday (0) for our grid
+  const startOffset = (firstDay === 0 ? 6 : firstDay - 1);
+  
+  let html = "";
+  for (let i = 0; i < startOffset; i++) {
+    html += `<div></div>`;
+  }
+  
+  const todayStr = new Date().toISOString().split("T")[0];
+  
+  for (let i = 1; i <= daysInMonth; i++) {
+    const dStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+    const isSelected = dStr === selectedDailyDateStr;
+    const isToday = dStr === todayStr;
+    
+    let bg = "transparent";
+    let color = "var(--text-color)";
+    let border = "1px solid transparent";
+    
+    if (isSelected) {
+      bg = "var(--accent)";
+      color = "#fff";
+    } else if (isToday) {
+      border = "1px solid var(--accent)";
+      color = "var(--accent)";
+    }
+    
+    html += `<div class="cal-day" data-date="${dStr}" style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; border-radius: 12px; cursor: pointer; background: ${bg}; color: ${color}; border: ${border};">${i}</div>`;
+  }
+  
+  calendarGrid.innerHTML = html;
+  
+  calendarGrid.querySelectorAll(".cal-day").forEach(el => {
+    el.addEventListener("click", (e) => {
+      const dStr = (e.currentTarget as HTMLElement).dataset.date;
+      if (dStr) {
+        selectedDailyDateStr = dStr;
+        updateDateDisplay();
+        calendarDialogOverlay.classList.remove("show");
+        renderDailyHistory(dStr);
+      }
+    });
+  });
+}
+
+function updateDateDisplay() {
+  if (!selectedDailyDateStr) return;
+  const d = new Date(selectedDailyDateStr);
+  dailyReportDateDisplay.textContent = `${d.getDate()}-${monthNames[d.getMonth()].substring(0,3)}, ${d.getFullYear()}`;
+}
+
+dailyReportDateTrigger?.addEventListener("click", () => {
+  if (selectedDailyDateStr) {
+    currentCalendarDate = new Date(selectedDailyDateStr);
+  } else {
+    currentCalendarDate = new Date();
+  }
+  renderCalendar();
+  calendarDialogOverlay.classList.add("show");
 });
+
+calendarCloseBtn?.addEventListener("click", () => {
+  calendarDialogOverlay.classList.remove("show");
+});
+
+calendarPrevBtn?.addEventListener("click", () => {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+  renderCalendar();
+});
+
+calendarNextBtn?.addEventListener("click", () => {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+  renderCalendar();
+});
+
 
 // History
 
 function renderHistory() {
-  if (!dailyReportDate.value) {
+  if (!selectedDailyDateStr) {
     const today = new Date().toISOString().split("T")[0];
-    dailyReportDate.value = today;
+    selectedDailyDateStr = today;
+    updateDateDisplay();
     renderDailyHistory(today);
   } else {
-    renderDailyHistory(dailyReportDate.value);
+    renderDailyHistory(selectedDailyDateStr);
   }
 
   const todayHistory = getTodayHistory();

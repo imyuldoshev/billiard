@@ -163,8 +163,17 @@
               <div style="font-size: 14px; color: var(--text-dim); margin-bottom: 4px;">Shu oydagi jami (<span id="dailyReportMonthLabel"></span> holatiga):</div>
               <div style="font-size: 24px; font-weight: 700; color: var(--green-avail);" id="dailyReportMonthTotal">0 so'm</div>
             </div>
-            <div class="field-group">
-              <input type="date" id="dailyReportDate" class="input" style="width: 100%;" />
+            <div class="field-group" id="dailyReportDateTrigger" style="cursor: pointer; background: var(--surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div>
+                <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 4px;">Sana</div>
+                <div id="dailyReportDateDisplay" style="font-size: 18px; font-weight: 600; color: var(--text-color);">Tanlang</div>
+              </div>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent);">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
             </div>
             <div class="history-summary">
               <span id="dailyReportCountLabel" class="history-count">0 ta o'yin</span>
@@ -335,7 +344,32 @@
         </div>
       </div>
 
-            <div class="modal-overlay" id="receiptDialogOverlay">
+                  <div class="modal-overlay" id="calendarDialogOverlay">
+        <div class="bottom-sheet" style="max-height: 90vh; overflow-y: auto;">
+          <div class="sheet-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: none;">
+            <button id="calendarPrevBtn" style="background: transparent; border: none; color: var(--text-color); cursor: pointer; padding: 12px;">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h3 id="calendarMonthYear" style="margin: 0; font-size: 18px;"></h3>
+            <button id="calendarNextBtn" style="background: transparent; border: none; color: var(--text-color); cursor: pointer; padding: 12px;">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <div class="sheet-content" style="padding-top: 8px;">
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; color: var(--text-dim); margin-bottom: 16px; font-weight: 500;">
+              <div>Du</div><div>Se</div><div>Ch</div><div>Pa</div><div>Ju</div><div>Sh</div><div>Ya</div>
+            </div>
+            <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
+              <!-- JS rendered days -->
+            </div>
+          </div>
+          <div style="padding: 16px; margin-top: 16px;">
+            <button class="btn btn-secondary" id="calendarCloseBtn" style="width: 100%; height: 50px; font-size: 16px;">Yopish</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-overlay" id="receiptDialogOverlay">
         <div class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
           <div class="sheet-header">
             <h3 id="receiptTitle">Chek</h3>
