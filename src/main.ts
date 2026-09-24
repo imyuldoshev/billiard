@@ -208,7 +208,7 @@ const receiptContent = document.getElementById("receiptContent") as HTMLElement;
 const receiptTitle = document.getElementById("receiptTitle") as HTMLElement;
 const receiptCloseBtn = document.getElementById("receiptCloseBtn") as HTMLButtonElement;
 receiptCloseBtn?.addEventListener("click", () => {
-  receiptDialogOverlay.classList.remove("show");
+  receiptDialogOverlay.classList.remove("open");
 });
 
 const hourlyRateInput = document.getElementById(
@@ -438,7 +438,7 @@ function openReceipt(session: any) {
     </div>
     ${session.customerName ? `<div style="margin-top: 16px; font-size: 14px; color: var(--text-dim); text-align: center;">Mijoz: ${escapeHtml(session.customerName)}</div>` : ''}
   `;
-  receiptDialogOverlay.classList.add("show");
+  receiptDialogOverlay.classList.add("open");
 }
 
 async function renderDailyHistory(dateStr: string) {
@@ -567,7 +567,7 @@ function renderCalendar() {
       if (dStr) {
         selectedDailyDateStr = dStr;
         updateDateDisplay();
-        calendarDialogOverlay.classList.remove("show");
+        calendarDialogOverlay.classList.remove("open");
         renderDailyHistory(dStr);
       }
     });
@@ -587,11 +587,11 @@ dailyReportDateTrigger?.addEventListener("click", () => {
     currentCalendarDate = new Date();
   }
   renderCalendar();
-  calendarDialogOverlay.classList.add("show");
+  calendarDialogOverlay.classList.add("open");
 });
 
 calendarCloseBtn?.addEventListener("click", () => {
-  calendarDialogOverlay.classList.remove("show");
+  calendarDialogOverlay.classList.remove("open");
 });
 
 calendarPrevBtn?.addEventListener("click", () => {
@@ -1128,8 +1128,8 @@ document.getElementById("saveRateBtn")?.addEventListener("click", () => {
         state.hourlyRate = val;
         saveState();
         const note = document.getElementById("saveNote");
-        note?.classList.add("show");
-        setTimeout(() => note?.classList.remove("show"), 2000);
+        note?.classList.add("open");
+        setTimeout(() => note?.classList.remove("open"), 2000);
       },
     });
   }
