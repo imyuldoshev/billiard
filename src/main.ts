@@ -885,10 +885,22 @@ document
 
 document
   .getElementById("sheetConfirmBtn")
-  ?.addEventListener("click", async () => {
-    if (pendingCheckoutTableId === null) return;
+  ?.addEventListener("click", async (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    const originalText = btn.textContent || "Tasdiqlash va yopish";
+    btn.textContent = "Kuting...";
+    btn.disabled = true;
+    if (pendingCheckoutTableId === null) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      return;
+    }
     const table = state.tables.find((t) => t.id === pendingCheckoutTableId);
-    if (!table || !table.occupied || !table.startTime) return;
+    if (!table || !table.occupied || !table.startTime) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      return;
+    }
 
     const durationMs = getEffectiveDuration(table);
     const rate = table.customRate ?? state.hourlyRate;
@@ -924,7 +936,7 @@ document
 
     await saveSessionToSupabase(session);
     state.history.push(session);
-    await sendReceiptToTelegram(table.id, session.startedAt, session.endedAt, gameAmount, session.barOrders);
+    await sendReceiptToTelegram(table.id, session.startedAt, session.endedAt, gameAmount, session.barOrders, session.paymentMethod, session.totalAmount);
 
     table.occupied = false;
     table.startTime = null;
@@ -940,6 +952,9 @@ document
 
     checkoutSheetOverlay.classList.remove("open");
     showDialog({ type: "alert", message: "Hisob yopildi va tarixga yozildi!" });
+    
+    btn.textContent = originalText;
+    btn.disabled = false;
   });
 
 // Bar Logic
@@ -1162,6 +1177,11 @@ document.getElementById("saveRateBtn")?.addEventListener("click", () => {
 const saveTgSettingsBtn = document.getElementById("saveTgSettingsBtn");
 saveTgSettingsBtn?.addEventListener("click", async () => {
   if (tgBotTokenInput && tgChatIdInput) {
+    const btn = saveTgSettingsBtn as HTMLButtonElement;
+    const originalText = btn.textContent || "Saqlash";
+    btn.textContent = "Saqlanmoqda...";
+    btn.disabled = true;
+
     state.tgBotToken = tgBotTokenInput.value.trim();
     state.tgChatId = tgChatIdInput.value.trim();
     state.tgChatId2 = tgChatId2Input ? tgChatId2Input.value.trim() : "";
@@ -1172,12 +1192,29 @@ saveTgSettingsBtn?.addEventListener("click", async () => {
       await updateUserSettings(phone, state.tgBotToken, state.tgChatId, state.tgChatId2);
     }
     
+    btn.textContent = originalText;
+    btn.disabled = false;
+
     const note = document.getElementById("saveTgNote");
     if (note) {
       note.style.display = "block";
       setTimeout(() => { note.style.display = "none"; }, 2000);
     }
   }
+});
+
+document.querySelectorAll(".toggle-visibility").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    const targetId = (e.currentTarget as HTMLElement).dataset.target;
+    if (targetId) {
+      const input = document.getElementById(targetId) as HTMLInputElement;
+      if (input.type === "password") {
+        input.type = "text";
+      } else {
+        input.type = "password";
+      }
+    }
+  });
 });
 
 // Sozlamalar — Enter bilan saqlash

@@ -212,9 +212,24 @@
           <div class="settings-card">
             <label>Telegram Bot Sozlamalari</label>
             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-              <input type="text" id="tgBotToken" class="input" placeholder="Bot Token (masalan: 12345:ABCDE...)" />
-              <input type="text" id="tgChatId" class="input" placeholder="Chat ID 1 (Asosiy)" />
-              <input type="text" id="tgChatId2" class="input" placeholder="Chat ID 2 (Qo'shimcha, ixtiyoriy)" />
+              <div style="position: relative;">
+                <input type="password" id="tgBotToken" class="input" placeholder="Bot Token (masalan: 12345:ABCDE...)" style="padding-right: 40px;" />
+                <button type="button" class="toggle-visibility" data-target="tgBotToken" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+              <div style="position: relative;">
+                <input type="password" id="tgChatId" class="input" placeholder="Chat ID 1 (Asosiy)" style="padding-right: 40px;" />
+                <button type="button" class="toggle-visibility" data-target="tgChatId" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+              <div style="position: relative;">
+                <input type="password" id="tgChatId2" class="input" placeholder="Chat ID 2 (Qo'shimcha, ixtiyoriy)" style="padding-right: 40px;" />
+                <button type="button" class="toggle-visibility" data-target="tgChatId2" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
               <button class="btn btn-primary" id="saveTgSettingsBtn">Saqlash</button>
               <div id="saveTgNote" class="save-note" style="display: none; color: var(--green-avail); margin-top: 4px; font-size: 14px;">Saqlandi ✓</div>
             </div>

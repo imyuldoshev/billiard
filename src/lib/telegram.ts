@@ -1,6 +1,6 @@
 import { state } from "../state/store";
 
-export async function sendReceiptToTelegram(tableId: number, startTime: string, endTime: string, gamePrice: number, barOrders: any[]) {
+export async function sendReceiptToTelegram(tableId: number, startTime: string, endTime: string, gamePrice: number, barOrders: any[], paymentMethod: string | null, totalAmount: number) {
   const botToken = state.tgBotToken;
   const chatId = state.tgChatId;
   const chatId2 = state.tgChatId2;
@@ -27,6 +27,9 @@ export async function sendReceiptToTelegram(tableId: number, startTime: string, 
         message += `${order.name} - ${order.qty} ta ( ${(order.price * order.qty).toLocaleString("ru-RU")} )\n`;
       });
     }
+    
+    message += `\nTo'lov turi:\n${paymentMethod === 'card' ? 'Karta' : 'Naqd'}\n`;
+    message += `Jami summa:\n${totalAmount.toLocaleString("ru-RU")} so'm\n`;
 
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     
