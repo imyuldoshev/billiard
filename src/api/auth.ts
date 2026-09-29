@@ -71,3 +71,39 @@ export async function verifyPin(phone: string, pin: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function getUserSettings(phone: string): Promise<{ tgBotToken: string, tgChatId: string, tgChatId2: string } | null> {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) return null;
+  
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("tg_bot_token, tg_chat_id, tg_chat_id2")
+      .eq("phone", phone)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return {
+      tgBotToken: data.tg_bot_token || "",
+      tgChatId: data.tg_chat_id || "",
+      tgChatId2: data.tg_chat_id2 || ""
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function updateUserSettings(phone: string, tgBotToken: string, tgChatId: string, tgChatId2: string): Promise<boolean> {
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_URL.startsWith("http")) return false;
+  
+  try {
+    const { error } = await supabase
+      .from("users")
+      .update({ tg_bot_token: tgBotToken, tg_chat_id: tgChatId, tg_chat_id2: tgChatId2 })
+      .eq("phone", phone);
+
+    return !error;
+  } catch (e) {
+    return false;
+  }
+}

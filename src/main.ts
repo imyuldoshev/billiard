@@ -28,7 +28,8 @@ import autoTable from "jspdf-autotable";
 import { registerSW } from "virtual:pwa-register";
 
 registerSW({ immediate: true });
-import { checkPhoneExists, registerUser, verifyPin } from "./api/auth";
+import { checkPhoneExists, registerUser, verifyPin, getUserSettings, updateUserSettings } from "./api/auth";
+import { sendReceiptToTelegram } from "./lib/telegram";
 
 // Auth Initialization
 const loginScreen = document.getElementById("loginScreen") as HTMLElement;
@@ -214,6 +215,9 @@ receiptCloseBtn?.addEventListener("click", () => {
 const hourlyRateInput = document.getElementById(
   "hourlyRate",
 ) as HTMLInputElement;
+const tgBotTokenInput = document.getElementById("tgBotToken") as HTMLInputElement;
+const tgChatIdInput = document.getElementById("tgChatId") as HTMLInputElement;
+const tgChatId2Input = document.getElementById("tgChatId2") as HTMLInputElement;
 
 // Navigation
 const navItems = document.querySelectorAll(".nav-item");
@@ -347,6 +351,16 @@ window.addEventListener("offline", updateOnlineStatus);
 
 async function initApp() {
   loadState();
+  const phone = localStorage.getItem("currentUser");
+  if (phone) {
+    const settings = await getUserSettings(phone);
+    if (settings) {
+       state.tgBotToken = settings.tgBotToken;
+       state.tgChatId = settings.tgChatId;
+       state.tgChatId2 = settings.tgChatId2;
+       saveState();
+    }
+  }
   updateOnlineStatus();
 
   if (state.tables.length === 0) {
@@ -365,6 +379,9 @@ async function initApp() {
   }
 
   hourlyRateInput.value = state.hourlyRate.toString();
+  if (tgBotTokenInput) tgBotTokenInput.value = state.tgBotToken || "";
+  if (tgChatIdInput) tgChatIdInput.value = state.tgChatId || "";
+  if (tgChatId2Input) tgChatId2Input.value = state.tgChatId2 || "";
 
   try {
     await Promise.all([
@@ -907,6 +924,7 @@ document
 
     await saveSessionToSupabase(session);
     state.history.push(session);
+    await sendReceiptToTelegram(table.id, session.startedAt, session.endedAt, gameAmount, session.barOrders);
 
     table.occupied = false;
     table.startTime = null;
@@ -1138,6 +1156,27 @@ document.getElementById("saveRateBtn")?.addEventListener("click", () => {
         setTimeout(() => note?.classList.remove("open"), 2000);
       },
     });
+  }
+});
+
+const saveTgSettingsBtn = document.getElementById("saveTgSettingsBtn");
+saveTgSettingsBtn?.addEventListener("click", async () => {
+  if (tgBotTokenInput && tgChatIdInput) {
+    state.tgBotToken = tgBotTokenInput.value.trim();
+    state.tgChatId = tgChatIdInput.value.trim();
+    state.tgChatId2 = tgChatId2Input ? tgChatId2Input.value.trim() : "";
+    saveState();
+
+    const phone = localStorage.getItem("currentUser");
+    if (phone) {
+      await updateUserSettings(phone, state.tgBotToken, state.tgChatId, state.tgChatId2);
+    }
+    
+    const note = document.getElementById("saveTgNote");
+    if (note) {
+      note.style.display = "block";
+      setTimeout(() => { note.style.display = "none"; }, 2000);
+    }
   }
 });
 

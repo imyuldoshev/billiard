@@ -26,6 +26,9 @@ export const state: AppState & {
   monthlyReports: [],
   dailyRevenueResetAtByDate: {},
   dailyRevenuePeriodStartedAt: null,
+  tgBotToken: "",
+  tgChatId: "",
+  tgChatId2: "",
 };
 
 export function addTable(): void {
@@ -77,6 +80,9 @@ export function loadState(): void {
           state.dailyRevenuePeriodStartedAt =
             parsed.dailyRevenuePeriodStartedAt;
         }
+        if (typeof parsed.tgBotToken === "string") state.tgBotToken = parsed.tgBotToken;
+        if (typeof parsed.tgChatId === "string") state.tgChatId = parsed.tgChatId;
+        if (typeof parsed.tgChatId2 === "string") state.tgChatId2 = parsed.tgChatId2;
       }
     } else {
       // If no state exists for this user, we must clear the current state so it doesn't bleed over from previous user memory

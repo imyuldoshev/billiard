@@ -210,6 +210,17 @@
           </div>
 
           <div class="settings-card">
+            <label>Telegram Bot Sozlamalari</label>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+              <input type="text" id="tgBotToken" class="input" placeholder="Bot Token (masalan: 12345:ABCDE...)" />
+              <input type="text" id="tgChatId" class="input" placeholder="Chat ID 1 (Asosiy)" />
+              <input type="text" id="tgChatId2" class="input" placeholder="Chat ID 2 (Qo'shimcha, ixtiyoriy)" />
+              <button class="btn btn-primary" id="saveTgSettingsBtn">Saqlash</button>
+              <div id="saveTgNote" class="save-note" style="display: none; color: var(--green-avail); margin-top: 4px; font-size: 14px;">Saqlandi ✓</div>
+            </div>
+          </div>
+
+          <div class="settings-card">
             <label>Arxiv va Ma'lumotlar</label>
             <div
               class="row"

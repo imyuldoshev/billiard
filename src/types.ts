@@ -69,4 +69,7 @@ export interface AppState {
   barItems: BarItem[];
   dailyReports: DailyReport[];
   monthlyReports: MonthlyReport[];
+  tgBotToken?: string;
+  tgChatId?: string;
+  tgChatId2?: string;
 }
